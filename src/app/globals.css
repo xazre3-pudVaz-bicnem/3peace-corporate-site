@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+
+@theme {
+  /* ---- カラー：白と青を基調に、濃紺とチャコールで文字を締める ---- */
+  --color-ink: #101c28; /* 見出し・本文（濃紺寄りのチャコール） */
+  --color-ink-soft: #41505f; /* 補足テキスト */
+  --color-navy: #0a3d73; /* 濃い青 */
+  --color-navy-deep: #07284a; /* 最も濃い青（ヒーロー背景など） */
+  --color-blue: #1273c9; /* 鮮やかな青（アクセント・リンク） */
+  --color-sky: #d6e8f6; /* 水色 */
+  --color-sky-soft: #eef5fb; /* 淡い水色の面 */
+  --color-line: #dfe6ed; /* 罫線 */
+  --color-line-strong: #c2ced9;
+  --color-mist: #f5f8fb; /* 薄いグレーの面 */
+
+  /* ---- タイポグラフィ ---- */
+  --font-sans:
+    var(--font-latin), 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
+    'YuGothic', Meiryo, sans-serif;
+
+  /* ---- レイアウト ---- */
+  --spacing-header: 4.5rem;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* スマホ固定CTAの高さ。固定CTAが本文・フッターを隠さないよう本文側で確保する */
+    --mobile-cta-height: 4.25rem;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --mobile-cta-height: 0rem;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'palt' 1;
+    line-height: 1.85;
+    letter-spacing: 0.02em;
+    /* 横スクロール防止 */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    font-weight: 700;
+  }
+
+  /* フォーカスリングを全体で統一（キーボード操作時に明確に見えるように） */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-sky);
+    color: var(--color-navy-deep);
+  }
+
+  /* 画像がレイアウトを崩さないための保険 */
+  img,
+  svg,
+  video {
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  /* セクション番号などに使う小さなラベル */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--color-blue);
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 1.75rem;
+    height: 1px;
+    background-color: currentColor;
+  }
+
+  /* 本文テキストの標準リンク */
+  .link-underline {
+    color: var(--color-navy);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+  }
+
+  .link-underline:hover {
+    color: var(--color-blue);
+  }
+
+  /* スクロール表示アニメーション（prefers-reduced-motion に対応） */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 縦罫線つきの引用ブロック */
+  .rule-left {
+    border-left: 3px solid var(--color-blue);
+    padding-left: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
