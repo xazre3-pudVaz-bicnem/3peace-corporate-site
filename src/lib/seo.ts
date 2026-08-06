@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { site } from '@/data/site'
+import { publicFileExists } from '@/lib/images'
 
 /**
  * 本番URL。未設定の場合は canonical / OG / sitemap を出力しません。
@@ -50,8 +51,9 @@ export function buildMetadata({
   modifiedTime,
 }: BuildMetadataInput): Metadata {
   const canonical = absoluteUrl(path)
-  const ogImage = image ?? site.ogImagePath
-  const ogImageUrl = absoluteUrl(ogImage)
+  // 指定された画像が未配置ならサイト共通のOG画像へ。それも無ければ画像を出力しない
+  const ogImage = image && publicFileExists(image) ? image : site.ogImagePath
+  const ogImageUrl = publicFileExists(ogImage) ? absoluteUrl(ogImage) : undefined
 
   const metadata: Metadata = {
     title,

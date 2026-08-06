@@ -19,12 +19,16 @@ export function Breadcrumbs({ items }: Props) {
             return (
               <li key={crumb.path} className="flex items-center gap-2">
                 {isLast ? (
-                  <span aria-current="page" className="text-ink">
+                  <span aria-current="page" className="inline-flex min-h-6 items-center text-ink">
                     {crumb.name}
                   </span>
                 ) : (
                   <>
-                    <Link href={crumb.path} className="hover:text-blue hover:underline">
+                    {/* タップ領域を 24px 以上確保する（WCAG 2.5.8） */}
+                    <Link
+                      href={crumb.path}
+                      className="inline-flex min-h-6 items-center hover:text-blue hover:underline"
+                    >
                       {crumb.name}
                     </Link>
                     <span aria-hidden="true" className="text-line-strong">

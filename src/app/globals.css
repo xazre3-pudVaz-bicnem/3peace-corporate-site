@@ -6,7 +6,12 @@
   --color-ink-soft: #41505f; /* 補足テキスト */
   --color-navy: #0a3d73; /* 濃い青 */
   --color-navy-deep: #07284a; /* 最も濃い青（ヒーロー背景など） */
-  --color-blue: #1273c9; /* 鮮やかな青（アクセント・リンク） */
+  /*
+    鮮やかな青（アクセント・リンク）。
+    白・薄いグレー(mist)・水色(sky-soft) のいずれの背景でも
+    コントラスト比 4.5:1 以上になる明度に調整している。
+  */
+  --color-blue: #0f6ab8;
   --color-sky: #d6e8f6; /* 水色 */
   --color-sky-soft: #eef5fb; /* 淡い水色の面 */
   --color-line: #dfe6ed; /* 罫線 */
@@ -25,8 +30,12 @@
 @layer base {
   :root {
     color-scheme: light;
-    /* スマホ固定CTAの高さ。固定CTAが本文・フッターを隠さないよう本文側で確保する */
-    --mobile-cta-height: 4.25rem;
+    /*
+      スマホ固定CTAの高さ。固定CTAが本文・フッターを隠さないよう本文側で確保する。
+      CTA本体は min-h-17（4.25rem）＋上罫線。文字サイズが変わった場合も覆わないよう
+      余裕をもたせた値にしている。
+    */
+    --mobile-cta-height: 5rem;
   }
 
   @media (min-width: 768px) {
@@ -38,6 +47,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {

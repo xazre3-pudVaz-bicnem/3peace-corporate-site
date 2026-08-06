@@ -70,7 +70,7 @@ function describedBy(name: string, error?: string, hint?: string) {
 }
 
 const controlClass =
-  'mt-2 block w-full border bg-white px-4 py-3 text-[0.95rem] text-ink transition-colors placeholder:text-ink-soft/60 focus:border-blue'
+  'mt-2 block w-full border bg-white px-4 py-3 text-[0.95rem] text-ink transition-colors placeholder:text-ink-soft/80 focus:border-blue'
 
 export function TextField({
   name,
@@ -162,7 +162,8 @@ export function SelectField({
         aria-describedby={describedBy(name, error, hint)}
         className={`${controlClass} ${error ? 'border-[#b3261e]' : 'border-line-strong'}`}
       >
-        <option value="" disabled>
+        {/* 任意項目は未選択に戻せるよう、プレースホルダーを選択可能にしておく */}
+        <option value="" disabled={required}>
           {placeholder}
         </option>
         {options.map((option) => (
@@ -186,11 +187,7 @@ export function RadioField({
   className = '',
 }: BaseProps & { options: string[] }) {
   return (
-    <fieldset
-      className={className}
-      aria-invalid={error ? true : undefined}
-      aria-describedby={describedBy(name, error, hint)}
-    >
+    <fieldset className={className} aria-describedby={describedBy(name, error, hint)}>
       <legend className="flex items-center gap-2 text-sm font-bold text-ink">
         {label}
         {required ? (

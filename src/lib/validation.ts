@@ -12,6 +12,14 @@ const TEL_RE = /^0\d{1,4}-?\d{1,4}-?\d{3,4}$/
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const KANA_RE = /^[぀-ゟ゠-ヿー\s　]+$/
 
+/**
+ * 未選択のラジオボタンや未チェックのチェックボックスは FormData にキー自体が入りません。
+ * そのまま検証すると zod の既定メッセージ（英語）が出てしまうため、
+ * 文字列以外は空文字として扱い、各項目の日本語メッセージが出るようにします。
+ */
+const asString = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value) => (typeof value === 'string' ? value : ''), schema)
+
 const requiredText = (label: string, max = 100) =>
   z
     .string()
@@ -109,29 +117,33 @@ export const installLocationOptions = [
 // ── お問い合わせフォーム ────────────────────────────────────────
 export const contactSchema = z
   .object({
-    name: requiredText('お名前'),
-    kana: kanaSchema,
-    tel: telSchema,
-    email: optionalEmailSchema,
-    area: optionalText(100),
-    inquiryType: z
-      .string()
-      .trim()
-      .min(1, 'お問い合わせ種別を選択してください。')
-      .refine((v) => inquiryTypeOptions.includes(v), { message: '選択内容が正しくありません。' }),
-    acStatus: optionalText(100),
-    installLocation: optionalText(100),
-    contactMethod: z
-      .string()
-      .trim()
-      .min(1, 'ご希望の連絡方法を選択してください。')
-      .refine((v) => contactMethods.includes(v as (typeof contactMethods)[number]), {
-        message: '選択内容が正しくありません。',
-      }),
-    contactTime: optionalText(50),
-    message: requiredText('お問い合わせ内容', 2000),
-    consent: consentSchema,
-    company: honeypotSchema,
+    name: asString(requiredText('お名前')),
+    kana: asString(kanaSchema),
+    tel: asString(telSchema),
+    email: asString(optionalEmailSchema),
+    area: asString(optionalText(100)),
+    inquiryType: asString(
+      z
+        .string()
+        .trim()
+        .min(1, 'お問い合わせ種別を選択してください。')
+        .refine((v) => inquiryTypeOptions.includes(v), { message: '選択内容が正しくありません。' }),
+    ),
+    acStatus: asString(optionalText(100)),
+    installLocation: asString(optionalText(100)),
+    contactMethod: asString(
+      z
+        .string()
+        .trim()
+        .min(1, 'ご希望の連絡方法を選択してください。')
+        .refine((v) => contactMethods.includes(v as (typeof contactMethods)[number]), {
+          message: '選択内容が正しくありません。',
+        }),
+    ),
+    contactTime: asString(optionalText(50)),
+    message: asString(requiredText('お問い合わせ内容', 2000)),
+    consent: asString(consentSchema),
+    company: asString(honeypotSchema),
   })
   .superRefine((data, ctx) => {
     if (data.contactMethod === 'メール' && !data.email) {
@@ -165,34 +177,38 @@ export const driverLicenseOptions = ['あり（AT限定なし）', 'あり（AT�
 
 export const applicationSchema = z
   .object({
-    name: requiredText('お名前'),
-    kana: kanaSchema,
-    age: z
-      .string()
-      .trim()
-      .refine((v) => v === '' || (/^\d{1,3}$/.test(v) && Number(v) >= 15 && Number(v) <= 99), {
-        message: '年齢は半角数字で入力してください。',
-      }),
-    tel: telSchema,
-    email: optionalEmailSchema,
-    area: requiredText('お住まいの地域', 100),
-    desiredJob: z.string().trim().min(1, '希望職種を選択してください。'),
-    employmentStatus: optionalText(50),
-    experience: optionalText(200),
-    licenses: optionalText(200),
-    driverLicense: optionalText(50),
-    contactMethod: z
-      .string()
-      .trim()
-      .min(1, 'ご希望の連絡方法を選択してください。')
-      .refine((v) => contactMethods.includes(v as (typeof contactMethods)[number]), {
-        message: '選択内容が正しくありません。',
-      }),
-    contactTime: optionalText(50),
-    reason: requiredText('応募理由', 2000),
-    questions: optionalText(2000),
-    consent: consentSchema,
-    company: honeypotSchema,
+    name: asString(requiredText('お名前')),
+    kana: asString(kanaSchema),
+    age: asString(
+      z
+        .string()
+        .trim()
+        .refine((v) => v === '' || (/^\d{1,3}$/.test(v) && Number(v) >= 15 && Number(v) <= 99), {
+          message: '年齢は半角数字で入力してください。',
+        }),
+    ),
+    tel: asString(telSchema),
+    email: asString(optionalEmailSchema),
+    area: asString(requiredText('お住まいの地域', 100)),
+    desiredJob: asString(z.string().trim().min(1, '希望職種を選択してください。')),
+    employmentStatus: asString(optionalText(50)),
+    experience: asString(optionalText(200)),
+    licenses: asString(optionalText(200)),
+    driverLicense: asString(optionalText(50)),
+    contactMethod: asString(
+      z
+        .string()
+        .trim()
+        .min(1, 'ご希望の連絡方法を選択してください。')
+        .refine((v) => contactMethods.includes(v as (typeof contactMethods)[number]), {
+          message: '選択内容が正しくありません。',
+        }),
+    ),
+    contactTime: asString(optionalText(50)),
+    reason: asString(requiredText('応募理由', 2000)),
+    questions: asString(optionalText(2000)),
+    consent: asString(consentSchema),
+    company: asString(honeypotSchema),
   })
   .superRefine((data, ctx) => {
     if (data.contactMethod === 'メール' && !data.email) {

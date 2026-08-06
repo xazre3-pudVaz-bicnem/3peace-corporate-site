@@ -102,7 +102,7 @@ export function Header() {
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
-                  className={`text-sm font-bold transition-colors hover:text-blue ${
+                  className={`inline-flex min-h-11 items-center text-sm font-bold transition-colors hover:text-blue ${
                     isCurrent(item.href) ? 'text-blue' : 'text-ink'
                   }`}
                 >

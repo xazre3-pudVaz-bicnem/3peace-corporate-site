@@ -7,7 +7,8 @@ import { site } from '@/data/site'
 function FooterNav({ title, items }: { title: string; items: NavItem[] }) {
   return (
     <div>
-      <h3 className="text-xs font-bold tracking-[0.18em] text-sky">{title}</h3>
+      {/* フッター内の見出し。本文が h2 までのページでも見出し階層が飛ばないよう h2 にしている */}
+      <h2 className="text-xs font-bold tracking-[0.18em] text-sky">{title}</h2>
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
           <li key={item.href}>

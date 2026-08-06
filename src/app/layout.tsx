@@ -46,6 +46,16 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja" className={latin.variable}>
+      <head>
+        {/*
+          スクロール表示アニメーション（.reveal）は JavaScript で表示状態にしている。
+          JavaScript が無効な環境で本文が非表示のままにならないよう、
+          その場合はアニメーションを無効化して最初から表示する。
+        */}
+        <noscript>
+          <style>{`.reveal{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
+      </head>
       <body className="pb-[var(--mobile-cta-height)]">
         <a
           href="#main"
