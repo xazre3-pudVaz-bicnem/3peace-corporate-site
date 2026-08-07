@@ -19,7 +19,7 @@ const OUT_DIR = path.join(process.cwd(), 'public', 'images')
 /** 元ファイル名（部分一致） → 出力先パス */
 const MAP = [
   // ヒーロー
-  ['20_16_44 (2)', 'hero/hero-indoor-unit-installation.webp'],
+  ['hero-2026-08-07', 'hero/hero-outdoor-unit.webp'],
 
   // OG画像（1200×630 にクロップ）
   // SNS・チャットアプリのクローラー互換性を優先して JPEG で出力します

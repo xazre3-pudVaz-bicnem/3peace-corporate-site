@@ -24,8 +24,8 @@ export type SiteImage = {
 export const images = {
   /** トップページのヒーロー背景 */
   hero: {
-    src: '/images/hero/hero-indoor-unit-installation.webp',
-    alt: '室内機を壁に取り付けている作業の様子',
+    src: '/images/hero/hero-outdoor-unit.webp',
+    alt: '住宅の外壁に架台で取り付けられた室外機と接続配管',
   },
 
   /** トップページ本文中の写真 */

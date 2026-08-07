@@ -27,10 +27,12 @@ export function HomeHero() {
           className="object-cover"
         />
         {/*
-          見出しの可読性を確保するための重ね。
-          写真をできるだけそのまま見せるため、文字が乗る下半分だけを暗くしています。
+          見出しの可読性を確保するための重ね。写真をできるだけそのまま見せるため、
+          全面を均一に暗くせず、文字が乗る「下側」と「左側」に集中させている。
+          （数値は実測でコントラスト比を確認済み。薄くしすぎると見出しが読めなくなる）
         */}
-        <div className="absolute inset-0 bg-linear-to-t from-navy-deep/90 via-navy-deep/45 via-45% to-transparent to-75%" />
+        <div className="absolute inset-0 bg-linear-to-t from-navy-deep/90 via-navy-deep/46 via-46% to-transparent to-76%" />
+        <div className="absolute inset-0 hidden sm:block sm:bg-linear-to-r sm:from-navy-deep/70 sm:via-navy-deep/22 sm:via-45% sm:to-transparent sm:to-68%" />
       </div>
 
       <Container width="wide">
@@ -39,7 +41,8 @@ export function HomeHero() {
 
           {/* H1：対策キーワードの一文と、ブランドコピーの二段構成 */}
           <h1>
-            <span className="eyebrow text-sky">広島のエアコン工事なら3Peace</span>
+            {/* 写真の上では水色より白のほうがコントラストを確保しやすい */}
+            <span className="eyebrow text-white">広島のエアコン工事なら3Peace</span>
             <span className="mt-5 block text-[2rem] leading-[1.25] font-bold tracking-tight drop-shadow-[0_2px_12px_rgba(7,40,74,0.5)] sm:text-5xl lg:text-6xl">
               広島の暮らしに、
               <br />

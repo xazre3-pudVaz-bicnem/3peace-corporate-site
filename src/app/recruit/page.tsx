@@ -67,15 +67,21 @@ export default function RecruitPage() {
             fallback="hide"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-b from-navy-deep/85 via-navy-deep/65 to-navy-deep/90 sm:bg-linear-to-r sm:from-navy-deep/92 sm:via-navy-deep/70 sm:to-navy-deep/30" />
+          {/*
+            見出しの可読性を確保するための重ね。
+            タブレット幅では見出しが右まで伸びるため、右端も暗さを残している
+            （実測でコントラスト比を確認済み）。
+          */}
+          <div className="absolute inset-0 bg-linear-to-b from-navy-deep/85 via-navy-deep/65 to-navy-deep/90 sm:bg-linear-to-r sm:from-navy-deep/92 sm:via-navy-deep/72 sm:to-navy-deep/55 lg:to-navy-deep/35" />
         </div>
 
         <Container width="wide">
           <div className="flex min-h-[26rem] flex-col justify-end py-16 sm:min-h-[32rem] sm:justify-center sm:py-24">
             <DevImageHint src={images.recruit.hero.src} label="採用ヒーロー" />
             <h1>
-              <span className="eyebrow text-sky">広島のエアコン工事スタッフ 採用情報</span>
-              <span className="mt-5 block text-[1.875rem] leading-[1.3] font-bold tracking-tight sm:text-5xl">
+              {/* 写真の上では水色より白のほうがコントラストを確保しやすい */}
+              <span className="eyebrow text-white">広島のエアコン工事スタッフ 採用情報</span>
+              <span className="mt-5 block max-w-4xl text-[1.875rem] leading-[1.3] font-bold tracking-tight sm:text-5xl">
                 {recruitHero.title}
               </span>
             </h1>
