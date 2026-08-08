@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
 import { PhoneIcon } from '@/components/ui/Button'
-import { footerCompanyNav, footerRecruitNav, footerServiceNav, type NavItem } from '@/data/nav'
+import { footerCompanyNav, footerKnowledgeNav, footerServiceNav, type NavItem } from '@/data/nav'
 import { site } from '@/data/site'
 
 function FooterNav({ title, items }: { title: string; items: NavItem[] }) {
@@ -60,14 +60,14 @@ export function Footer() {
           </div>
 
           <div className="grid gap-10 sm:grid-cols-3">
-            <FooterNav title="工事をご検討の方へ" items={footerServiceNav} />
-            <FooterNav title="採用をお考えの方へ" items={footerRecruitNav} />
-            <FooterNav title="会社情報" items={footerCompanyNav} />
+            <FooterNav title="エアコン工事" items={footerServiceNav} />
+            <FooterNav title="知りたいことから探す" items={footerKnowledgeNav} />
+            <FooterNav title="会社情報・採用" items={footerCompanyNav} />
           </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/15 py-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>広島市を中心にエアコンの新設・交換・移設・取り外しを行っています。</p>
+          <p>広島市西区己斐上を拠点に、エアコンの新設・交換・移設・取り外しを行っています。</p>
           <p>&copy; {year} {site.name}</p>
         </div>
       </Container>

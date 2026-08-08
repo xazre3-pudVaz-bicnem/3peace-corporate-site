@@ -6,6 +6,7 @@ import { ContactCta } from '@/components/sections/ContactCta'
 import { InstagramSection } from '@/components/sections/InstagramSection'
 import { CompanyTable } from '@/components/sections/CompanyTable'
 import { FaqList } from '@/components/sections/FaqList'
+import { RelatedLinks } from '@/components/sections/RelatedLinks'
 import { Container } from '@/components/ui/Container'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { ArrowRight, ButtonLink } from '@/components/ui/Button'
@@ -15,24 +16,27 @@ import { JsonLd } from '@/components/ui/JsonLd'
 
 import { publishedServices, relatedFields } from '@/data/services'
 import { publishedWorks, hasWorks } from '@/data/works'
-import { customerFaqs } from '@/data/faq'
+import { getFaqsByIds } from '@/data/faq'
 import { publishedNews, hasNews } from '@/data/news'
-import { publishedAreas, site } from '@/data/site'
+import { publishedColumns } from '@/data/columns'
+import { indexableAreas } from '@/data/areas'
+import { site } from '@/data/site'
 import { images } from '@/data/images'
 import { aboutValues } from '@/data/about'
 import { recruitMessage } from '@/data/recruit'
-import { buildMetadata } from '@/lib/seo'
+import { HOME_TITLE, buildMetadata } from '@/lib/seo'
 import { faqPageSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: '広島のエアコン工事なら3Peace｜取り付け・交換のご相談',
+  title: HOME_TITLE,
   description:
-    '広島市を拠点にエアコンの新設・交換・移設・取り外しを行う3Peaceです。設置場所と配管経路を確認し、試運転と動作確認まで行ったうえで施工します。工事のご相談・エアコン工事スタッフの採用情報はこちら。',
+    '広島市西区己斐上を拠点にエアコンの新設・交換・移設・取り外しを行う3Peace。設置場所や配管経路、室外機の設置条件を確認し、現場に合わせたエアコン工事をご案内します。工事のご相談・エアコン工事スタッフの採用情報はこちらから。',
   path: '/',
+  absoluteTitle: true,
 })
 
-/** トップページで表示するFAQは、代表的な5件に絞る */
-const topFaqs = customerFaqs.slice(0, 5)
+/** トップページで表示するFAQ（検索意図の広いものを選ぶ） */
+const topFaqIds = ['estimate', 'own-unit', 'no-outlet', 'outdoor-place', 'duration']
 
 const flowSteps = [
   { no: '01', title: 'お問い合わせ', body: '電話・フォーム・Instagram からご連絡ください。設置場所やご希望をお伺いします。' },
@@ -43,37 +47,64 @@ const flowSteps = [
   { no: '06', title: '試運転・お引き渡し', body: '真空引きと試運転で動作を確認し、清掃と使い方のご説明をして完了です。' },
 ]
 
+/** エアコン工事で確認するポイント（トップページ用の要約） */
+const checkPoints = [
+  {
+    title: '壁の下地と取り付け位置',
+    body: '据付板は壁の中の柱や間柱に効かせて固定します。石膏ボードだけに留めると、本体の重みと振動で緩んでいきます。',
+  },
+  {
+    title: '配管を通す穴の勾配',
+    body: '室内側から室外側へ下がっていないと、ドレン水が室内へ戻ります。既存の穴を使う場合はこの勾配を確認します。',
+  },
+  {
+    title: '室外機を据えられる場所',
+    body: '水平に据えられるか、吹き出し口の前に空間があるか、排水の落ち先に問題がないかを見ています。',
+  },
+  {
+    title: 'コンセントの形状と電圧',
+    body: '100Vと200Vではコンセントの形が違い、変換して使うことはできません。専用回路かどうかもあわせて確認します。',
+  },
+]
+
 export default function HomePage() {
+  const topFaqs = getFaqsByIds(topFaqIds)
+
   return (
     <>
       <HomeHero />
 
-      {/* 02 3Peaceの短い紹介 */}
+      {/* 広島でエアコン工事を依頼するなら */}
       <Section space="normal" aria-labelledby="intro-heading">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div>
             <SectionHeading
               eyebrow="About"
               id="intro-heading"
-              title="広島市を拠点に、エアコン工事を行っています"
+              title="広島でエアコン工事を依頼するなら"
             />
-            <Reveal delay={80} className="mt-8 space-y-6 text-[0.975rem] leading-8 text-ink-soft">
+            <Reveal delay={80} className="mt-8 space-y-6 text-[0.975rem] leading-9 text-ink-soft">
               <p>
-                3Peaceは、広島市を拠点にエアコン工事を行っています。室内機の設置から配管、室外機の設置まで、
-                建物や設置場所の状況を確認しながら、一件一件丁寧に施工します。
+                3Peaceは、広島市西区己斐上を拠点にエアコン工事を行っています。室内機の設置から配管、
+                室外機の設置まで、建物や設置場所の状況を確認しながら、一件一件丁寧に施工します。
               </p>
               <p>
-                同じ機種を取り付ける工事でも、壁の下地、配管を通せる経路、室外機を置ける場所は建物ごとに違います。
-                現場を見てから施工方法を決め、真空引きと試運転、動作確認まで行ってから引き渡します。
+                エアコン工事は、本体を壁に掛けるだけの作業ではありません。同じ機種を取り付ける場合でも、
+                壁の下地、配管を通せる経路、室外機を置ける場所は建物ごとに違います。現場を見てから施工方法を決め、
+                真空引きと試運転、動作確認まで行ってから引き渡します。
               </p>
               <p>
                 エアコンのほかに、{relatedFields.join('・')}
                 に関するご相談もお受けしています。内容によって対応できる範囲が変わるため、まずはご相談ください。
               </p>
             </Reveal>
-            <Reveal delay={120} className="mt-8">
+            <Reveal delay={120} className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink href="/service" variant="outline">
+                対応しているエアコン工事を見る
+                <ArrowRight />
+              </ButtonLink>
               <ButtonLink href="/about" variant="ghost">
-                3Peaceについて詳しく見る
+                3Peaceの考え方を見る
                 <ArrowRight />
               </ButtonLink>
             </Reveal>
@@ -91,13 +122,13 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* 03 対応しているエアコン工事 */}
+      {/* 3Peaceが対応しているエアコン工事 */}
       <Section tone="mist" divided aria-labelledby="service-heading">
         <SectionHeading
           eyebrow="Service"
           id="service-heading"
-          title="対応しているエアコン工事"
-          lead="広島市を中心に、住まいのエアコン工事に対応しています。設置環境によって工事内容が変わるため、現場の状況を確認したうえでご案内します。"
+          title="3Peaceが対応しているエアコン工事"
+          lead="新設・交換・移設・取り外しの4つに対応しています。それぞれのページで、工事の内容、当日の流れ、確認するポイント、料金が決まる要素を詳しくご案内しています。"
         />
 
         <ul className="mt-12 border-t border-line-strong">
@@ -122,10 +153,8 @@ export default function HomePage() {
                       {service.lead}
                     </span>
                   </span>
-                  <span
-                    aria-hidden="true"
-                    className="text-blue transition-transform group-hover:translate-x-1"
-                  >
+                  <span className="inline-flex items-center gap-2 text-sm font-bold whitespace-nowrap text-blue transition-transform group-hover:translate-x-1">
+                    詳しく見る
                     <ArrowRight className="h-5 w-5" />
                   </span>
                 </Link>
@@ -136,22 +165,41 @@ export default function HomePage() {
 
         <Reveal delay={120} className="mt-10">
           <ButtonLink href="/service" variant="outline">
-            業務案内をすべて見る
+            エアコン工事の一覧を見る
             <ArrowRight />
           </ButtonLink>
         </Reveal>
       </Section>
 
-      {/* 04 3Peaceが大切にしていること */}
-      <Section divided aria-labelledby="values-heading">
+      {/* エアコン工事で確認するポイント */}
+      <Section divided aria-labelledby="check-heading">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
+          <SectionHeading
+            eyebrow="Check Points"
+            id="check-heading"
+            title="エアコン工事で確認するポイント"
+            lead="仕上がりの差が出るのは、工事の直後ではなく数年後です。その場で確認できることは、その場で確認してから次の工程へ進みます。"
+          />
+          <div className="grid gap-px bg-line sm:grid-cols-2">
+            {checkPoints.map((item, index) => (
+              <Reveal key={item.title} delay={index * 70} className="bg-white p-6 sm:p-7">
+                <h3 className="text-base font-bold text-navy">{item.title}</h3>
+                <p className="mt-3 text-[0.9rem] leading-7 text-ink-soft">{item.body}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* 3Peaceが大切にしていること */}
+      <Section tone="mist" divided aria-labelledby="values-heading">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
           <SectionHeading
             eyebrow="Our Standard"
             id="values-heading"
             title="3Peaceが大切にしていること"
-            lead="仕上がりの差が出るのは、工事の直後ではなく数年後です。その場で確認できることは、その場で確認してから次の工程へ進みます。"
+            lead="見えなくなる部分の処理と、動くところまで確認して終えること。この2つを外さないようにしています。"
           />
-
           <div className="grid gap-px bg-line sm:grid-cols-2">
             {aboutValues.items.map((item, index) => (
               <Reveal key={item.title} delay={index * 70} className="bg-white p-6 sm:p-7">
@@ -163,9 +211,9 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* 05 最新の施工事例（0件の場合はセクションごと非表示） */}
+      {/* 最新の施工事例（0件の場合はセクションごと非表示） */}
       {hasWorks ? (
-        <Section tone="mist" divided aria-labelledby="works-heading">
+        <Section divided aria-labelledby="works-heading">
           <SectionHeading
             eyebrow="Works"
             id="works-heading"
@@ -223,7 +271,7 @@ export default function HomePage() {
         />
       </Reveal>
 
-      {/* 06 施工の流れ */}
+      {/* 施工の流れ */}
       <Section aria-labelledby="flow-heading">
         <SectionHeading
           eyebrow="Flow"
@@ -246,30 +294,76 @@ export default function HomePage() {
         </ol>
       </Section>
 
-      {/* 07 対応エリア */}
-      <Section tone="mist" divided width="narrow" aria-labelledby="area-heading">
+      {/* 広島市でエアコン工事をご検討の方へ（地域） */}
+      <Section tone="sky" divided width="narrow" aria-labelledby="area-heading">
         <SectionHeading
           eyebrow="Area"
           id="area-heading"
-          title="対応エリア"
-          lead={`${publishedAreas.map((a) => a.name).join('・')}を中心に対応しています。エリア外と思われる場所でも、まずはご相談ください。現場の場所と工事内容を確認したうえでお返事します。`}
+          title="広島市でエアコン工事をご検討の方へ"
         />
-        <Reveal delay={80} className="mt-8">
-          <ul className="flex flex-wrap gap-2">
-            {publishedAreas.map((area) => (
-              <li
-                key={area.name}
-                className="border border-line-strong bg-white px-4 py-2 text-sm font-bold text-navy"
-              >
-                {area.name}
-              </li>
-            ))}
-          </ul>
+        <Reveal delay={60} className="mt-8 space-y-5 text-[0.975rem] leading-9 text-ink-soft">
+          <p>
+            3Peaceの事業所は広島市西区己斐上にあります。己斐や高須のように高低差のある住宅地と、
+            庚午や観音のように区画の整った市街地では、室外機を据えられる場所も配管の通し方も変わります。
+          </p>
+          <p>
+            ご依頼をお考えの地域については、場所と工事の内容をお伺いしたうえでお返事します。
+            エリア外かもしれないと思われる場合でも、まずはご相談ください。
+          </p>
+        </Reveal>
+        {indexableAreas.length > 0 ? (
+          <Reveal delay={100} className="mt-10">
+            <RelatedLinks
+              id="area-links-heading"
+              links={indexableAreas.map((area) => ({
+                href: `/area/${area.slug}`,
+                label: `${area.name}のエアコン工事について見る`,
+                description: 'その地域の住宅事情をふまえた確認ポイントを掲載しています。',
+              }))}
+              columns={1}
+            />
+          </Reveal>
+        ) : null}
+      </Section>
+
+      {/* エアコン工事専門コラム */}
+      <Section divided aria-labelledby="column-heading">
+        <SectionHeading
+          eyebrow="Column"
+          id="column-heading"
+          title="エアコン工事専門コラム"
+          lead="工事を依頼する前に知っておくと役に立つことを、施工する側の視点でまとめています。"
+        />
+        <ul className="mt-12 grid gap-px border-t border-line-strong bg-line sm:grid-cols-2 lg:grid-cols-3">
+          {publishedColumns.slice(0, 6).map((column, index) => (
+            <li key={column.slug} className="bg-white">
+              <Reveal delay={index * 50}>
+                <Link
+                  href={`/column/${column.slug}`}
+                  className="group flex h-full flex-col p-6 transition-colors hover:bg-mist"
+                >
+                  <span className="text-[0.95rem] leading-7 font-bold text-ink group-hover:text-blue">
+                    {column.title}
+                  </span>
+                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-blue">
+                    記事を読む
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+        <Reveal delay={120} className="mt-10">
+          <ButtonLink href="/column" variant="outline">
+            専門コラムの一覧を見る
+            <ArrowRight />
+          </ButtonLink>
         </Reveal>
       </Section>
 
-      {/* 08 よくある質問 */}
-      <Section divided width="narrow" aria-labelledby="faq-heading">
+      {/* よくある質問 */}
+      <Section tone="mist" divided width="narrow" aria-labelledby="faq-heading">
         <SectionHeading
           eyebrow="FAQ"
           id="faq-heading"
@@ -281,13 +375,13 @@ export default function HomePage() {
         </Reveal>
         <Reveal delay={120} className="mt-8">
           <ButtonLink href="/faq" variant="ghost">
-            よくある質問をすべて見る
+            エアコン工事のよくある質問をすべて見る
             <ArrowRight />
           </ButtonLink>
         </Reveal>
       </Section>
 
-      {/* 09 採用メッセージ */}
+      {/* 採用メッセージ */}
       <section
         aria-labelledby="recruit-heading"
         className="relative isolate overflow-hidden bg-navy-deep py-16 text-white sm:py-24"
@@ -304,37 +398,37 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-linear-to-r from-navy-deep via-navy-deep/90 to-navy-deep/55" />
         </div>
         <Container>
-        <div className="grid gap-10 lg:grid-cols-[1fr_minmax(0,22rem)] lg:items-end lg:gap-16">
-          <div>
-            <SectionHeading
-              eyebrow="Recruit"
-              id="recruit-heading"
-              tone="light"
-              title="技術を身につけ、必要とされる仕事を。"
-              lead={recruitMessage.paragraphs[0]}
-            />
-            <Reveal delay={80} className="mt-6 max-w-2xl text-[0.95rem] leading-8 text-white/80">
-              <p>
-                エアコン工事は、暮らしの快適さを支える仕事です。3Peaceでは、一つひとつの現場に向き合いながら、
-                技術者として成長したい仲間を募集します。
-              </p>
+          <div className="grid gap-10 lg:grid-cols-[1fr_minmax(0,22rem)] lg:items-end lg:gap-16">
+            <div>
+              <SectionHeading
+                eyebrow="Recruit"
+                id="recruit-heading"
+                tone="light"
+                title="技術を身につけ、必要とされる仕事を。"
+                lead={recruitMessage.paragraphs[0]}
+              />
+              <Reveal delay={80} className="mt-6 max-w-2xl text-[0.95rem] leading-8 text-white/80">
+                <p>
+                  エアコン工事は、暮らしの快適さを支える仕事です。3Peaceでは、一つひとつの現場に向き合いながら、
+                  技術者として成長したい仲間を募集します。
+                </p>
+              </Reveal>
+            </div>
+            <Reveal delay={140} className="flex flex-col gap-3">
+              <ButtonLink href="/recruit" variant="light" size="lg">
+                エアコン工事の仕事内容を見る
+                <ArrowRight />
+              </ButtonLink>
+              <ButtonLink href="/recruit#jobs" variant="lightOutline" size="lg">
+                募集職種と応募方法を見る
+                <ArrowRight />
+              </ButtonLink>
             </Reveal>
           </div>
-          <Reveal delay={140} className="flex flex-col gap-3">
-            <ButtonLink href="/recruit" variant="light" size="lg">
-              仕事内容を詳しく見る
-              <ArrowRight />
-            </ButtonLink>
-            <ButtonLink href="/recruit#jobs" variant="lightOutline" size="lg">
-              募集要項を見る
-              <ArrowRight />
-            </ButtonLink>
-          </Reveal>
-        </div>
         </Container>
       </section>
 
-      {/* 10 Instagram */}
+      {/* Instagram */}
       <InstagramSection />
 
       {/* お知らせ（0件のあいだは非表示） */}
@@ -366,22 +460,29 @@ export default function HomePage() {
         </Section>
       ) : null}
 
-      {/* 11 お問い合わせCTA */}
-      <ContactCta />
+      {/* お問い合わせCTA */}
+      <ContactCta
+        examples={[
+          'この設置場所でも取り付けられる？',
+          '本体は購入済みだけど工事だけ頼みたい',
+          '室外機を置ける場所が分からない',
+          '古いエアコンの取り外しもお願いしたい',
+        ]}
+      />
 
-      {/* 12 会社概要 */}
+      {/* 会社情報 */}
       <Section width="narrow" aria-labelledby="company-heading">
-        <SectionHeading eyebrow="Company" id="company-heading" title="会社概要" />
+        <SectionHeading eyebrow="Company" id="company-heading" title="会社情報" />
         <Reveal delay={80} className="mt-10">
           <CompanyTable />
         </Reveal>
         <Reveal delay={120} className="mt-8 flex flex-wrap gap-3">
           <ButtonLink href="/about" variant="outline">
-            3Peaceについて
+            3Peaceの仕事と考え方を見る
             <ArrowRight />
           </ButtonLink>
           <ButtonLink href="/message" variant="ghost">
-            代表挨拶
+            代表挨拶を読む
             <ArrowRight />
           </ButtonLink>
         </Reveal>
@@ -395,6 +496,7 @@ export default function HomePage() {
           >
             {site.instagramHandle}
           </a>
+          　施工中の様子を掲載しています。
         </p>
       </Section>
 

@@ -25,7 +25,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: '3Peaceについて｜広島市西区のエアコン工事会社',
+  title: '会社案内｜広島市西区のエアコン工事',
   description:
     '広島市西区己斐上を拠点にエアコン工事を行う3Peaceの会社案内です。仕事で大切にしていること、安全と施工品質への考え方、お客様とのやりとり、会社概要とアクセスを掲載しています。',
   path: '/about',

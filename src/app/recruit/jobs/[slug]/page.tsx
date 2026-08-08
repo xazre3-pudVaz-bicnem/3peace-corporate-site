@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!job) return {}
 
   return buildMetadata({
-    title: `${job.title}の求人｜広島市の3Peace`,
+    title: `${job.title}の求人｜広島市西区`,
     description: job.shortDescription,
     path: `/recruit/jobs/${job.slug}`,
   })

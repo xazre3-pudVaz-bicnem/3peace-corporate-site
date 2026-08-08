@@ -38,7 +38,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema, faqPageSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: '広島のエアコン工事スタッフ求人・採用情報｜3Peace',
+  title: '広島のエアコン工事スタッフ求人・採用情報',
   description:
     '広島市のエアコン工事会社3Peaceの採用情報です。エアコン工事の仕事内容、一日の流れ、入社後に身につく技術、求める人物像、募集職種、応募の流れを掲載しています。応募前のご相談も受け付けています。',
   path: '/recruit',

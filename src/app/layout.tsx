@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/Footer'
 import { MobileCta } from '@/components/layout/MobileCta'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { hvacBusinessSchema, organizationSchema, websiteSchema } from '@/lib/schema'
-import { SITE_URL } from '@/lib/seo'
+import { BRAND, HOME_TITLE, SITE_URL } from '@/lib/seo'
 import { site } from '@/data/site'
 
 /**
@@ -28,8 +28,9 @@ const siteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim(
 export const metadata: Metadata = {
   ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: {
-    default: '広島のエアコン工事なら3Peace｜取り付け・交換のご相談',
-    template: `%s｜${site.name}`,
+    // 各ページは「｜3Peace」を自分で付けず、このテンプレートに任せる
+    default: HOME_TITLE,
+    template: `%s｜${BRAND}`,
   },
   description: site.description,
   applicationName: site.name,

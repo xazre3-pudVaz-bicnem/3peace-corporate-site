@@ -4,11 +4,18 @@ import { publishedServices } from '@/data/services'
 import { publishedWorks, hasWorks } from '@/data/works'
 import { publishedJobs } from '@/data/jobs'
 import { publishedNews, hasNews } from '@/data/news'
+import { publishedColumns, hasColumns, columnLastModified } from '@/data/columns'
+import { indexableAreas } from '@/data/areas'
 
 /**
  * サイトマップ。
- * published: true のデータだけを含めます。
- * NEXT_PUBLIC_SITE_URL が未設定の場合は、誤ったURLを出力しないため空を返します。
+ *
+ * 含めるのは「公開中かつインデックス対象」のページだけです。
+ * enabled: false の地域、published: false のデータ、記事が0件のときの一覧ページ、
+ * noindex を設定しているページは出力しません。
+ *
+ * URL は SITE_URL から生成しているため、独自ドメインへ移行しても
+ * NEXT_PUBLIC_SITE_URL を変えるだけで切り替わります。
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!SITE_URL) return []
@@ -19,10 +26,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: url('/'), lastModified: now, changeFrequency: 'monthly', priority: 1 },
     { url: url('/service'), lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
-    { url: url('/recruit'), lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: url('/recruit'), lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: url('/about'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
     { url: url('/message'), lastModified: now, changeFrequency: 'yearly', priority: 0.5 },
-    { url: url('/faq'), lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: url('/faq'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/contact'), lastModified: now, changeFrequency: 'yearly', priority: 0.8 },
     { url: url('/privacy'), lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]
@@ -31,8 +38,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: url(`/service/${service.slug}`),
     lastModified: now,
     changeFrequency: 'monthly',
+    priority: 0.9,
+  }))
+
+  // 地域ページは enabled かつ index のものだけ
+  const areaEntries: MetadataRoute.Sitemap = indexableAreas.map((area) => ({
+    url: url(`/area/${area.slug}`),
+    lastModified: now,
+    changeFrequency: 'monthly',
     priority: 0.8,
   }))
+
+  // 専門コラムは記事がある場合のみ一覧・詳細を含める
+  const columnEntries: MetadataRoute.Sitemap = hasColumns
+    ? [
+        { url: url('/column'), lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+        ...publishedColumns.map((column) => ({
+          url: url(`/column/${column.slug}`),
+          lastModified: columnLastModified(column),
+          changeFrequency: 'monthly' as const,
+          priority: 0.7,
+        })),
+      ]
+    : []
 
   // 施工事例は1件以上ある場合のみ一覧・詳細を含める
   const workEntries: MetadataRoute.Sitemap = hasWorks
@@ -40,18 +68,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: url('/works'), lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
         ...publishedWorks.map((work) => ({
           url: url(`/works/${work.slug}`),
-          lastModified: now,
+          lastModified: work.completedAt ? new Date(`${work.completedAt}-01`) : now,
           changeFrequency: 'yearly' as const,
-          priority: 0.6,
+          priority: 0.7,
         })),
       ]
     : []
 
   const jobEntries: MetadataRoute.Sitemap = publishedJobs.map((job) => ({
     url: url(`/recruit/jobs/${job.slug}`),
-    lastModified: now,
+    lastModified: job.datePosted ? new Date(job.datePosted) : now,
     changeFrequency: 'monthly',
-    priority: 0.7,
+    priority: 0.6,
   }))
 
   // お知らせは記事がある場合のみ含める
@@ -67,5 +95,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ]
     : []
 
-  return [...staticEntries, ...serviceEntries, ...workEntries, ...jobEntries, ...newsEntries]
+  return [
+    ...staticEntries,
+    ...serviceEntries,
+    ...areaEntries,
+    ...columnEntries,
+    ...workEntries,
+    ...jobEntries,
+    ...newsEntries,
+  ]
 }

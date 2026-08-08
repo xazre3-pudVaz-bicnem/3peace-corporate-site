@@ -14,9 +14,9 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'お問い合わせ｜広島のエアコン工事 3Peace',
+  title: 'エアコン工事のご相談・お問い合わせ',
   description:
-    'エアコンの新設・交換・移設・取り外しに関するご相談はこちらから。広島市を中心に対応しています。お電話（080-3880-4024）・フォーム・Instagram で受け付けています。',
+    'エアコンの新設・交換・移設・取り外しに関するご相談はこちらから。広島市西区己斐上を拠点にエアコン工事を行う3Peaceが、設置場所の状況を確認したうえでご案内します。お電話（080-3880-4024）・フォーム・Instagram で受け付けています。',
   path: '/contact',
 })
 

@@ -9,11 +9,56 @@
 
 ---
 
-## 🚨 公開前に必ず設定するもの
+## サイトURLの解決方法（SEOの土台）
 
-**`NEXT_PUBLIC_SITE_URL` が未設定のあいだ、robots.txt は全ページ Disallow（検索エンジンに拒否）になります。**
-canonical・OG画像・sitemap も出力されません。これは Vercel のプレビューURLが誤って
-インデックスされるのを防ぐための仕様です。本番公開時は必ず設定してください。
+canonical・OG・sitemap・robots・JSON-LD・RSS のURLは、すべて次の順で解決した
+「サイトURL」から生成しています。URLをコードに直接書いている箇所はありません。
+
+| 優先 | 参照する値 | 使う場面 |
+| --- | --- | --- |
+| 1 | `NEXT_PUBLIC_SITE_URL` | 独自ドメインを使う場合。設定すればこれが最優先されます |
+| 2 | `VERCEL_PROJECT_PRODUCTION_URL`（Vercelが自動で渡す） | 本番デプロイ時。環境変数を設定しなくてもインデックス可能になります |
+| 3 | 解決できない | canonical / sitemap を出力せず、robots.txt は全ページ Disallow |
+
+3 になるのはプレビュー環境（`VERCEL_ENV=preview`）とローカルです。
+プレビューURLが検索結果に出ることを防いでいます。
+
+**独自ドメインへ移行するときは、`NEXT_PUBLIC_SITE_URL` を変更するだけで
+canonical・sitemap・robots・OG・JSON-LD・RSS のURLがすべて切り替わります。**
+
+---
+
+## Google Search Console の設定手順
+
+公開後、次の順で進めてください。
+
+1. **プロパティを登録する**
+   [Search Console](https://search.google.com/search-console) を開き、「URLプレフィックス」に
+   本番URLを入力します。独自ドメインを使う場合は「ドメイン」プロパティのほうが、
+   www有無やhttp/httpsをまとめて扱えるため扱いやすくなります。
+2. **所有権を確認する**
+   HTMLタグによる確認を選び、表示された `content` の値を環境変数
+   `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` に設定して再デプロイします。
+   （`<meta name="google-site-verification">` が自動で出力されます）
+3. **サイトマップを送信する**
+   「サイトマップ」から `sitemap.xml` を送信します。
+   送信後、ステータスが「成功しました」になり、検出されたURL数が表示されることを確認します。
+4. **主要ページをURL検査する**
+   トップ、`/service`、各工事ページ、`/area/hiroshima-nishi`、`/column` を
+   URL検査ツールで確認します。「URLはGoogleに登録されていません」と出た場合は
+   「インデックス登録をリクエスト」を実行します。
+5. **canonical を確認する**
+   URL検査の「ユーザーが指定した正規URL」と「Googleが選択した正規URL」が
+   一致しているかを見ます。ずれている場合は内容の重複が疑われます。
+6. **ページのインデックス登録状況を確認する**
+   数日後に「ページ」レポートを開き、登録済みのページ数と、除外された理由を確認します。
+   意図せず「noindex タグによって除外されました」に入っていないかを見てください。
+   施工事例（`/works`）とお知らせ（`/news`）は、データが0件のあいだ意図的に noindex です。
+7. **Core Web Vitals を確認する**
+   「ウェブに関する主な指標」で LCP・CLS・INP を確認します。
+   データが集まるまで数週間かかります。
+
+あわせて、専門コラムのRSS（`/feed.xml`）も公開しています。
 
 ---
 
@@ -71,8 +116,10 @@ npm run dev                  # http://localhost:3000
 
 | ファイル | 内容 |
 | --- | --- |
-| `src/data/site.ts` | 会社名・代表者名・住所・電話番号・Instagram・営業時間・定休日・対応エリア・Googleマップ・問い合わせ受付状態 |
+| `src/data/site.ts` | 会社名・代表者名・住所・電話番号・Instagram・営業時間・定休日・Googleマップ・問い合わせ受付状態 |
+| `src/data/areas.ts` | 地域ページ（公開する地域と、その地域固有の本文） |
 | `src/data/services.ts` | 業務案内（対応工事）と料金についての表記 |
+| `src/data/columns/` | エアコン工事専門コラム（1記事1ファイル＋`index.ts`） |
 | `src/data/works.ts` | 施工事例 |
 | `src/data/about.ts` | 「3Peaceについて」本文・代表挨拶 |
 | `src/data/recruit.ts` | 採用ページ本文・応募受付設定・一日の流れ・入社後のステップ・数字・インタビュー |
@@ -104,19 +151,34 @@ email: 'info@example.jp',                   // 確認できたら入力する
 > ℹ️ 営業時間は画面（会社概要）に表示していますが、定休日が「不定休」で
 > 曜日を特定できないため、構造化データの `openingHours` には出力していません。
 > 曜日ごとの営業時間が確定したら `src/lib/schema.ts` に追加できます。
+>
+> ⚠️ **「対応エリア」は掲載していません。**
+> どこまで出張しているかが確認できていないため、会社概要には所在地（＝拠点）のみを
+> 載せています。サイト全体でも「広島市西区己斐上を拠点に」という事実の範囲で表現しており、
+> 「広島市全域に対応」といった断定は使っていません。
+> 出張範囲が確定したら、下記の地域ページを公開してください。
 
-対応エリアは `serviceAreas` で管理します。`published: true` のものだけが画面と
-`HVACBusiness` の `areaServed` に出力されます。
+---
+
+## 地域ページを追加する
+
+`src/data/areas.ts` で管理します。**薄い地域ページの大量生成は避けてください。**
+
+現在公開しているのは、事業所の所在地から確認できる `広島市西区` のみです。
+他の区は `enabled: false` で登録してあり、ページは生成されません。
 
 ```ts
-export const serviceAreas: ServiceArea[] = [
-  { name: '広島市', published: true },
-  { name: '山口県', published: false },  // 対応範囲を確認したら true にする
-]
+{ slug: 'hiroshima-naka', name: '広島市中区', shortName: '中区', enabled: false, index: false }
 ```
 
-> ℹ️ Instagram のプロフィールには「広島県・福岡県・山口県」と記載がありますが、
-> エアコン工事としての出張対応範囲が確認できていないため、現在は広島市のみを公開しています。
+公開するときは次を行ってください。
+
+1. `enabled: true` と `index: true` にする
+2. `content` にその地域固有の本文（`description` / `intro` / `points` / `flow` / `faqIds`）を書く
+3. **他の地域ページと同じ文章を使い回さない**（自動生成ページとみなされる原因になります）
+
+`enabled: true` かつ `content` があるページだけが生成され、`index: true` のものだけが
+サイトマップと `HVACBusiness` の `areaServed` に出力されます。
 
 ---
 
@@ -195,6 +257,32 @@ export const recruitmentSettings = {
 - `published: false` にする（ページごと非公開・サイトマップからも除外）
 - `acceptingApplications: false` にする（募集終了表示へ切り替え・応募フォームを閉じる）
 - `validThrough` を過去日にする（JobPosting が自動的に出力されなくなる）
+
+---
+
+## 専門コラムの記事を追加する
+
+`src/data/columns/` に1記事1ファイルで置き、`index.ts` の `allColumns` へ追加します。
+`published: true` にすると、一覧・詳細ページ・サイトマップ・RSS（`/feed.xml`）へ
+自動的に反映されます。
+
+### 記事を書くときのルール
+
+- **1記事につき検索意図を1つに絞る。** 複数の意図を混ぜると、どのキーワードでも
+  評価されにくくなります。
+- **他の記事やサービスページと同じ文章を使い回さない。** 共通のテーマ（真空引き、
+  ドレン排水、電源など）も、その記事の視点から書き分けています。
+- **対応可否が確認できていないことを「できます」と書かない。** 一般的な仕組みの説明と、
+  「現場を確認したうえでご案内します」を使い分けてください。
+- **監修表記は「3Peace 代表 面出 洋平」まで。** 資格・経験年数・施工件数は
+  確認できていないため書かないでください。
+- `relatedServices` と `relatedColumns` を必ず埋めてください。ここが内部リンクになります。
+
+### 記事の構成
+
+`sections` に `heading` と `id` を書くと、目次が自動生成されます。
+本文は `body`（段落）・`list`（箇条書き）・`steps`（手順）・`subsections`（H3）・
+`note`（注意書き）・`image`（写真）を組み合わせて構成します。
 
 ---
 
@@ -288,11 +376,11 @@ CONTACT_FROM_EMAIL=noreply@example.jp
 
 | 項目 | 状態 |
 | --- | --- |
-| 営業時間 | ✅ 9:00〜18:00（`businessHours.weekday`） |
-| 定休日 | ✅ 不定休（`closedDays`） |
+| 営業時間 | ⚠️ 9:00〜18:00 を掲載中（2026-08-06にご提供いただいた情報）。相違があればお知らせください |
+| 定休日 | ⚠️ 不定休を掲載中（同上） |
 | 郵便番号 | ❌ 未確認（`address.postalCode`） |
 | 問い合わせ先メールアドレス | ❌ 未確認（`email`） |
-| 対応エリア（広島市以外） | ❌ 未確認（`serviceAreas`） |
+| 対応エリア（出張範囲） | ❌ 未確認（掲載していません。`src/data/areas.ts`） |
 | 正式な事業内容 | △ エアコン工事のみ記載（`businessSummary`） |
 | 会社の設立年・沿革 | ❌ 未確認（現在サイトに記載なし） |
 | 法人格の有無・正式名称 | ❌ 未確認 |
@@ -351,10 +439,49 @@ CONTACT_FROM_EMAIL=noreply@example.jp
 
 ---
 
+## SEOの設計方針
+
+### ページごとの検索意図（カニバリ防止）
+
+同じキーワードを複数ページで奪い合わないよう、役割を分けています。
+新しいページを追加するときは、この表に重ならない意図を割り当ててください。
+
+| ページ | 主な検索意図 |
+| --- | --- |
+| `/` | 広島 エアコン工事 |
+| `/service` | 広島 エアコン工事（工事の種類を選ぶ段階） |
+| `/service/installation` | 広島市 エアコン取り付け・新設 |
+| `/service/replacement` | 広島 エアコン交換・買い替え |
+| `/service/relocation` | 広島 エアコン移設・引越し |
+| `/service/removal` | 広島 エアコン取り外し |
+| `/area/hiroshima-nishi` | 広島市西区 エアコン工事 |
+| `/column/*` | 情報収集（依頼前に調べていること） |
+| `/works` | 施工事例を見て業者を選びたい |
+| `/recruit` | 広島 エアコン工事 求人 |
+
+### title の付け方
+
+`src/app/layout.tsx` の `title.template` が `%s｜3Peace` を自動で付与します。
+**各ページの `title` に「｜3Peace」を自分で付けないでください。**
+付けると `｜3Peace｜3Peace` と二重になります。
+
+トップページだけは template が適用されない仕様のため、
+`buildMetadata({ absoluteTitle: true })` で完全形のタイトルを指定しています。
+
+### 内部リンクのルール
+
+- 「詳しくはこちら」のような、リンク先が分からないアンカーテキストは使わない
+- 「広島市のエアコン取り付け工事について詳しく見る」のように、リンク先の内容が分かる文言にする
+- 各ページ下部に「関連するエアコン工事」「関連する施工事例」「関連記事」を置く
+
+---
+
 ## 公開前チェック項目
 
-- [ ] `NEXT_PUBLIC_SITE_URL` に本番ドメインを設定した
-- [ ] `https://ドメイン/robots.txt` が `Allow: /` になっている
+- [ ] `https://ドメイン/robots.txt` が `Allow: /` になっている（`Disallow: /` ならサイトURLが解決できていません）
+- [ ] 独自ドメインを使う場合は `NEXT_PUBLIC_SITE_URL` を設定した
+- [ ] `https://ドメイン/feed.xml` が RSS として返る
+- [ ] title に `｜3Peace｜3Peace` の二重表記がない
 - [ ] `https://ドメイン/sitemap.xml` に想定どおりのURLが並んでいる
 - [ ] 各ページの canonical が本番ドメインになっている（プレビューURLが出ていない）
 - [ ] ロゴを配置した（`public/logo/3peace-logo.png`）
@@ -413,11 +540,13 @@ src/
 
 | ページ | 出力する JSON-LD |
 | --- | --- |
-| 全ページ（共通） | `Organization` / `WebSite` / `HVACBusiness` |
+| 全ページ（共通） | `Organization` / `WebSite`（`alternateName` 付き）/ `HVACBusiness` |
 | 下層ページすべて | `BreadcrumbList` |
 | トップ | `FAQPage` |
-| 業務案内（詳細） | `Service` / `FAQPage` |
-| 施工事例（詳細） | `CreativeWork` |
+| エアコン工事（一覧・詳細） | `Service`（`hasOfferCatalog` 付き）/ `FAQPage` |
+| 地域ページ | `Service` / `FAQPage` |
+| 専門コラム（詳細） | `Article`（`reviewedBy` に代表者名）/ `FAQPage` |
+| 施工事例（詳細） | `Article` |
 | お知らせ（詳細） | `Article` |
 | よくある質問 | `FAQPage` |
 | 求人詳細 | `JobPosting`（必須項目がすべて揃っている場合のみ） |

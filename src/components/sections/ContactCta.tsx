@@ -8,6 +8,8 @@ type Props = {
   /** 見出しを差し替えたい場合 */
   heading?: string
   lead?: string
+  /** 相談しやすさを伝える具体例（「〇〇でも大丈夫？」といった文言） */
+  examples?: string[]
   className?: string
 }
 
@@ -18,6 +20,7 @@ type Props = {
 export function ContactCta({
   heading = 'エアコン工事のご相談を受け付けています',
   lead = '設置場所の状況によって必要な工事が変わります。「取り付けられるか分からない」という段階でもご相談ください。現場の状況を確認したうえでご案内します。',
+  examples,
   className = '',
 }: Props) {
   return (
@@ -31,6 +34,21 @@ export function ContactCta({
             </h2>
             <p className="mt-5 max-w-2xl text-[0.95rem] leading-8 text-white/85">{lead}</p>
           </Reveal>
+
+          {examples && examples.length > 0 ? (
+            <Reveal delay={40} className="mt-8">
+              <ul className="flex flex-wrap gap-2">
+                {examples.map((example) => (
+                  <li
+                    key={example}
+                    className="border border-white/35 px-4 py-2 text-[0.85rem] leading-6 text-white/90"
+                  >
+                    「{example}」
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          ) : null}
 
           <Reveal delay={80} className="mt-10">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">

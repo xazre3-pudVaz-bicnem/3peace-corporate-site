@@ -17,28 +17,17 @@ export type BusinessHours = {
   note?: string
 }
 
-export type ServiceArea = {
-  name: string
-  /** 実際に対応していることが確認できた地域のみ true */
-  published: boolean
-  /** 補足（README 用のメモも兼ねる） */
-  note?: string
-}
-
 /**
- * 対応エリア。
- * Instagram プロフィールに「広島県・福岡県・山口県」と記載があるが、
- * エアコン工事としてどこまで出張対応しているかは未確認のため、
- * 拠点のある広島市のみを公開状態としている。
- * 実際の対応範囲が確定したら published を true にすること。
+ * 事業所の所在地から確認できる「拠点」の表記。
+ *
+ * 【重要】どこまで出張しているかは未確認のため、
+ * 「対応エリア：〇〇」という断定表現はサイト上で使っていません。
+ * 拠点が広島市西区己斐上であることは住所から確認できる事実なので、
+ * その範囲で「広島市西区を拠点に」と表現しています。
+ *
+ * 出張範囲が確定したら src/data/areas.ts の該当地域を enabled にしてください。
  */
-export const serviceAreas: ServiceArea[] = [
-  { name: '広島市', published: true },
-  { name: '広島市西区', published: false, note: '区単位ページを作る場合に公開' },
-  { name: '広島県内', published: false, note: '出張範囲の確定後に公開' },
-  { name: '山口県', published: false, note: 'Instagram プロフィールに記載あり／範囲未確認' },
-  { name: '福岡県', published: false, note: 'Instagram プロフィールに記載あり／範囲未確認' },
-]
+export const baseLocationLabel = '広島市西区'
 
 export const site = {
   /** 会社名 */
@@ -52,7 +41,7 @@ export const site = {
   /** サイトのキャッチ */
   tagline: '広島の暮らしに、確かなエアコン工事を。',
   description:
-    '3Peace は広島市を拠点に、エアコンの新設・交換・移設・取り外しを行っています。設置場所や配管経路を一件ずつ確認し、試運転と動作確認まで行ったうえで施工を完了します。',
+    '3Peace は広島市西区己斐上を拠点に、エアコンの新設・交換・移設・取り外しを行っています。設置場所や配管経路を一件ずつ確認し、真空引きと試運転、動作確認まで行ったうえで施工を完了します。',
 
   /** 住所（表記はサイト内でこの1箇所に統一） */
   address: {
@@ -73,7 +62,12 @@ export const site = {
   /** 問い合わせ先メール（未設定の場合フォームは停止し、電話・Instagram導線のみ表示） */
   email: undefined as OptionalText,
 
-  /** 営業時間・定休日 */
+  /**
+   * 営業時間・定休日。
+   * 2026-08-06 にユーザーから提供された情報（9:00〜18:00 / 不定休）。
+   * 定休日が「不定休」で曜日を特定できないため、構造化データの
+   * openingHours には出力していません（画面表示のみ）。
+   */
   businessHours: { weekday: '9:00〜18:00' } as BusinessHours,
   closedDays: '不定休',
 
@@ -108,12 +102,14 @@ export function hasValue(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length > 0
 }
 
-/** 公開中の対応エリア名 */
-export const publishedAreas = serviceAreas.filter((a) => a.published)
-
 /** 会社概要テーブル（値が無い行は自動で非表示） */
 export type CompanyRow = { label: string; value?: string; href?: string }
 
+/**
+ * 「対応エリア」の行は意図的に置いていません。
+ * どこまで出張しているかが未確認のため、所在地（＝拠点）のみを掲載しています。
+ * 出張範囲が確定したら行を追加してください。
+ */
 export const companyRows: CompanyRow[] = [
   { label: '会社名', value: site.name },
   { label: '代表者', value: site.representative },
@@ -122,10 +118,6 @@ export const companyRows: CompanyRow[] = [
   { label: '事業内容', value: site.businessSummary },
   { label: '営業時間', value: site.businessHours.weekday },
   { label: '定休日', value: site.closedDays },
-  {
-    label: '対応エリア',
-    value: publishedAreas.length > 0 ? publishedAreas.map((a) => a.name).join('・') : undefined,
-  },
   { label: 'Instagram', value: site.instagramHandle, href: site.instagram },
 ]
 

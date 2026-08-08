@@ -17,7 +17,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: '広島のエアコン工事施工事例｜3Peace',
+  title: '広島のエアコン工事の施工事例',
   description:
     '3Peaceが広島市で行ったエアコン工事の施工事例です。工事種別・建物種別・エリアごとに、設置前の状況、施工内容、施工時のポイントを掲載しています。',
   path: '/works',

@@ -9,7 +9,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'プライバシーポリシー｜3Peace',
+  title: 'プライバシーポリシー',
   description:
     '3Peaceにおける個人情報の取り扱いについて定めたプライバシーポリシーです。取得する情報、利用目的、第三者提供、開示請求などについて記載しています。',
   path: '/privacy',

@@ -12,7 +12,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'お知らせ｜広島のエアコン工事 3Peace',
+  title: 'お知らせ',
   description: '3Peaceからのお知らせ、施工情報、採用情報を掲載しています。',
   path: '/news',
   // 記事が0件のあいだは検索結果に出さない

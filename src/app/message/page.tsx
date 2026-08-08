@@ -16,7 +16,7 @@ import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
-  title: '代表挨拶｜広島のエアコン工事 3Peace',
+  title: '代表挨拶｜エアコン工事への考え方',
   description:
     '3Peace代表 面出洋平からのご挨拶です。一件の工事を確かなものにするという考え方と、一緒に働く仲間が成長できる会社を目指す姿勢についてお伝えします。',
   path: '/message',
