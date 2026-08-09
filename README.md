@@ -9,6 +9,34 @@
 
 ---
 
+## 🚨 いま設定が必要なもの
+
+本番ドメイン **`https://www.3peace-hiroshima.com`** を Vercel に接続済みですが、
+`NEXT_PUBLIC_SITE_URL` が未設定のため、canonical・OG・サイトマップのURLが
+`3peace-corporate-site.vercel.app` のままになっています。
+この状態では、独自ドメインではなく vercel.app のURLが検索エンジンに評価されます。
+
+**Vercel の Settings → Environment Variables で次を追加し、再デプロイしてください。**
+
+```env
+NEXT_PUBLIC_SITE_URL=https://www.3peace-hiroshima.com
+```
+
+- Environment は **Production / Preview / Development すべて** にチェックを入れてください
+- **必ず `www` 付きで設定してください。** このサイトは apex（wwwなし）から www へ
+  リダイレクトされるため、www なしを設定するとリダイレクトが循環します
+- 環境変数はビルド時に読み込まれるため、**追加後に再デプロイが必要**です
+
+設定後、次を確認してください。
+
+```bash
+curl -s https://www.3peace-hiroshima.com/robots.txt          # Host / Sitemap が独自ドメインか
+curl -s https://www.3peace-hiroshima.com/ | grep canonical    # canonical が独自ドメインか
+curl -I https://3peace-corporate-site.vercel.app/             # 308 で独自ドメインへ転送されるか
+```
+
+---
+
 ## サイトURLの解決方法（SEOの土台）
 
 canonical・OG・sitemap・robots・JSON-LD・RSS のURLは、すべて次の順で解決した
@@ -17,14 +45,22 @@ canonical・OG・sitemap・robots・JSON-LD・RSS のURLは、すべて次の順
 | 優先 | 参照する値 | 使う場面 |
 | --- | --- | --- |
 | 1 | `NEXT_PUBLIC_SITE_URL` | 独自ドメインを使う場合。設定すればこれが最優先されます |
-| 2 | `VERCEL_PROJECT_PRODUCTION_URL`（Vercelが自動で渡す） | 本番デプロイ時。環境変数を設定しなくてもインデックス可能になります |
+| 2 | `VERCEL_PROJECT_PRODUCTION_URL`（Vercelが自動で渡す） | 未設定時の保険。`*.vercel.app` になることがあります |
 | 3 | 解決できない | canonical / sitemap を出力せず、robots.txt は全ページ Disallow |
 
 3 になるのはプレビュー環境（`VERCEL_ENV=preview`）とローカルです。
 プレビューURLが検索結果に出ることを防いでいます。
 
-**独自ドメインへ移行するときは、`NEXT_PUBLIC_SITE_URL` を変更するだけで
+**独自ドメインへ移行・変更するときは、`NEXT_PUBLIC_SITE_URL` を変更するだけで
 canonical・sitemap・robots・OG・JSON-LD・RSS のURLがすべて切り替わります。**
+
+### 重複コンテンツの防止
+
+`NEXT_PUBLIC_SITE_URL` に独自ドメインを設定すると、本番デプロイでは
+`*.vercel.app` へのアクセスが正規ドメインへ 308 リダイレクトされます
+（`next.config.ts` の `redirects()`）。同じ内容が2つのURLで見られる状態を防ぐためです。
+
+プレビューデプロイは閲覧できる必要があるため、リダイレクトの対象外です。
 
 ---
 
