@@ -6,6 +6,12 @@ import { publishedJobs } from '@/data/jobs'
 import { publishedNews, hasNews } from '@/data/news'
 import { publishedColumns, hasColumns, columnLastModified } from '@/data/columns'
 import { indexableAreas } from '@/data/areas'
+import {
+  getAllPosts,
+  getIndexableCategories,
+  categoryLastModified,
+  postLastModified,
+} from '@/lib/blog'
 
 /**
  * サイトマップ。
@@ -62,6 +68,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ]
     : []
 
+  // ブログ（自動投稿）は記事がある場合のみ一覧・詳細を含める。
+  // カテゴリー一覧は記事が一定数たまってから（薄い一覧ページを載せない）
+  const blogPosts = getAllPosts()
+  const blogEntries: MetadataRoute.Sitemap =
+    blogPosts.length > 0
+      ? [
+          { url: url('/blog'), lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+          ...blogPosts.map((post) => ({
+            url: url(`/blog/${post.slug}`),
+            lastModified: postLastModified(post),
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+          })),
+          ...getIndexableCategories().map((category) => ({
+            url: url(`/blog/category/${category.slug}`),
+            lastModified: categoryLastModified(category.slug),
+            changeFrequency: 'weekly' as const,
+            priority: 0.5,
+          })),
+        ]
+      : []
+
   // 施工事例は1件以上ある場合のみ一覧・詳細を含める
   const workEntries: MetadataRoute.Sitemap = hasWorks
     ? [
@@ -100,6 +128,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...serviceEntries,
     ...areaEntries,
     ...columnEntries,
+    ...blogEntries,
     ...workEntries,
     ...jobEntries,
     ...newsEntries,

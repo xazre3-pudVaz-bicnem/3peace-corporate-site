@@ -4,6 +4,17 @@ import { hasColumns } from '@/data/columns'
 import { publishedServices } from '@/data/services'
 import { indexableAreas } from '@/data/areas'
 
+/**
+ * ブログ（自動投稿）のリンクを出すかどうか。
+ *
+ * 記事の有無は content/blog をファイルシステムで読むため（@/lib/blog）、
+ * このファイルを読み込むクライアントコンポーネント（Header）では判定できません。
+ * 記事は毎日追加されていくので固定で true にしています。
+ * ブログを一時的に止めたい場合はここを false にしてください
+ *（/blog 自体は記事0件でも「準備中」として表示されます）。
+ */
+const hasBlog = true
+
 export type NavItem = {
   label: string
   href: string
@@ -16,6 +27,7 @@ export const mainNav: NavItem[] = [
   { label: 'エアコン工事', href: '/service' },
   ...(hasWorks ? [{ label: '施工事例', href: '/works' }] : []),
   ...(hasColumns ? [{ label: '専門コラム', href: '/column' }] : []),
+  ...(hasBlog ? [{ label: 'ブログ', href: '/blog' }] : []),
   { label: '3Peaceについて', href: '/about' },
   { label: 'よくある質問', href: '/faq' },
   { label: '採用情報', href: '/recruit' },
@@ -35,6 +47,7 @@ export const footerServiceNav: NavItem[] = [
 /** フッター：知りたいことから探す */
 export const footerKnowledgeNav: NavItem[] = [
   ...(hasColumns ? [{ label: '専門コラム', href: '/column' }] : []),
+  ...(hasBlog ? [{ label: 'ブログ', href: '/blog' }] : []),
   { label: 'よくある質問', href: '/faq' },
   ...indexableAreas.map((area) => ({
     label: `${area.name}のエアコン工事`,

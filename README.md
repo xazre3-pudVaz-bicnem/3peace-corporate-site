@@ -35,6 +35,12 @@ curl -s https://www.3peace-hiroshima.com/ | grep canonical    # canonical が独
 curl -I https://3peace-corporate-site.vercel.app/             # 308 で独自ドメインへ転送されるか
 ```
 
+### ブログの自動投稿を動かすには
+
+GitHub リポジトリの Secrets に `ANTHROPIC_API_KEY` を1件登録するだけです。
+詳しくは「[ブログの自動投稿](#ブログの自動投稿claude-api--github-actions)」を参照してください。
+未登録のあいだは毎日のワークフローが失敗するだけで、サイトの表示には影響しません。
+
 ---
 
 ## サイトURLの解決方法（SEOの土台）
@@ -115,6 +121,7 @@ npm run dev                  # http://localhost:3000
 | `npm run start` | ビルド結果をローカルで起動 |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | 型チェック（`tsc --noEmit`） |
+| `npm run blog:generate` | ブログ記事を1本生成して `content/blog/` に保存（要 `ANTHROPIC_API_KEY`） |
 
 ### Vercel へのデプロイ
 
@@ -135,6 +142,8 @@ npm run dev                  # http://localhost:3000
 | `CONTACT_FROM_EMAIL` | フォーム利用時 | 送信元メールアドレス（Resend で認証済みのドメイン） |
 | `NEXT_PUBLIC_GA_ID` | 任意 | Google Analytics 4 の測定ID（`G-XXXXXXX`） |
 | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | 任意 | Search Console の所有権確認コード |
+| `ANTHROPIC_API_KEY` | ブログ自動投稿時 | Claude API のキー。**Vercel ではなく GitHub Secrets に登録します** |
+| `ANTHROPIC_MODEL` | 任意 | 生成に使うモデル。未設定なら `claude-haiku-4-5-20251001` |
 
 メール関連の3つが未設定でもビルドは成功します。その場合フォームは送信停止状態になり、
 画面には電話・Instagram からの問い合わせ案内のみが表示されます。
@@ -319,6 +328,102 @@ export const recruitmentSettings = {
 `sections` に `heading` と `id` を書くと、目次が自動生成されます。
 本文は `body`（段落）・`list`（箇条書き）・`steps`（手順）・`subsections`（H3）・
 `note`（注意書き）・`image`（写真）を組み合わせて構成します。
+
+---
+
+## ブログの自動投稿（Claude API + GitHub Actions）
+
+毎日 **12:10（日本時間）** に記事を1本生成し、`content/blog/` へ Markdown で保存して
+`main` へ直接コミットします。Vercel が変更を検知して自動でデプロイされます。
+
+### 使うために必要な設定（1つだけ）
+
+GitHub リポジトリの **Settings → Secrets and variables → Actions → New repository secret** で、
+次の1件だけを登録してください。
+
+| 名前 | 値 |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | [Anthropic Console](https://console.anthropic.com/) で発行した API キー |
+
+これ以外の Secret は不要です。Vercel 側の設定変更もありません。
+
+### モデルとコスト
+
+コストを抑えるため、既定では **`claude-haiku-4-5-20251001`** を使います。
+GitHub の **Settings → Secrets and variables → Actions → Variables** に
+`ANTHROPIC_MODEL` を追加すると、そちらが優先されます。
+実行時に使用したモデル名が Actions のログに出力されます。
+
+> 毎日の自動生成に Sonnet / Opus は使いません。品質を上げたい記事は
+> `ANTHROPIC_MODEL` を一時的に変更したうえで `workflow_dispatch` で手動実行してください。
+
+### 動作の仕組み
+
+| ファイル | 役割 |
+| --- | --- |
+| `.github/workflows/daily-blog.yml` | 毎日 03:10 UTC（＝12:10 JST）に起動。手動実行も可能 |
+| `scripts/blog-topics.ts` | 記事テーマの一覧（36件）と、本文で使ってよい内部リンクの許可リスト |
+| `scripts/generate-daily-post.ts` | Claude API を呼び、Markdown を組み立てて保存 |
+| `src/lib/blog.ts` | `content/blog/*.md` の読み込み（frontmatter が壊れた記事は自動でスキップ） |
+| `src/app/blog/` | 一覧 `/blog`、詳細 `/blog/[slug]`、カテゴリー `/blog/category/[category]` |
+
+1. `content/blog/` の既存記事から `topicId` を集め、**まだ使っていないテーマ**を選びます
+   （全部使い切ったら、最後に使ってから最も日が経ったテーマに戻ります）
+2. Claude API を構造化出力（JSON Schema）で呼び出し、記事の各パーツを受け取ります
+3. frontmatter と Markdown は**スクリプト側で組み立てます**（書式が崩れないようにするため）
+4. 保存前に禁止表現をチェックし、1つでも見つかったら**保存せずに終了**します
+5. 変更がなければコミットせずに正常終了します
+
+### 生成された記事に含めない内容（自動チェック付き）
+
+プロンプトで禁止したうえで、保存直前にも次のパターンを機械的に検査しています。
+検出された場合はファイルを書き出さずにジョブが失敗します。
+
+- 金額（`〇〇円`）
+- 「広島で一番」「地域最安」などの根拠のない最上級表現
+- 「必ず取り付けできます」といった対応可否の断定
+- 「即日対応」「最短〇分」などの確認できない約束
+- 創業年・施工実績件数
+- 時給・月給・賞与など未確定の求人条件
+- 許可リストにない内部リンク（リンク切れ防止）
+
+### 記事を手直しする・取り下げる
+
+生成物は普通の Markdown ファイルです。`content/blog/` のファイルを直接編集してコミットすれば反映されます。
+
+- 公開を取り消す → frontmatter の `published: true` を `false` に変える
+- 更新日を出す → `updated: "2026-08-20"` を追加する
+- 削除する → ファイルごと消す
+
+### 専門コラム（`/column`）との使い分け
+
+| | `/column` 専門コラム | `/blog` ブログ |
+| --- | --- | --- |
+| 作り方 | 手作業（`src/data/columns/` の TypeScript） | Claude API で毎日1本 |
+| 役割 | 体系的な解説。検索の受け皿となる主要記事 | 個別の疑問に答える記事。更新頻度を担う |
+| 本数 | 10本（増やすときは手動） | 毎日1本ずつ増える |
+
+同じキーワードを2つのページで奪い合わないよう、テーマが重なるトピックには
+`scripts/blog-topics.ts` の `relatedColumn` を設定してあります。
+その場合、ブログ側は概要にとどめてコラムへ内部リンクするようプロンプトで指示しています。
+
+### カテゴリーページの扱い
+
+カテゴリー一覧（`/blog/category/[category]`）は、記事が **3本以上**たまるまで `noindex` にし、
+サイトマップにも載せません（内容の薄い一覧ページを検索結果に出さないため）。
+しきい値は `src/lib/blog.ts` の `MIN_POSTS_FOR_INDEXING` で変更できます。
+
+### ローカルで試す
+
+```bash
+# APIを呼ばずに、次に選ばれるテーマとプロンプトだけを確認する（キー不要・ファイルは作られません）
+npx tsx scripts/generate-daily-post.ts --dry-run
+
+# 実際に1本生成する
+export ANTHROPIC_API_KEY=sk-ant-...
+npm run blog:generate      # content/blog に1本増える
+npm run build              # 表示を確認
+```
 
 ---
 
@@ -551,6 +656,13 @@ src/
     contact/page.tsx            お問い合わせ
     news/page.tsx               お知らせ一覧
     news/[slug]/page.tsx        お知らせ詳細
+    column/page.tsx             専門コラム一覧（手作業）
+    column/[slug]/page.tsx      専門コラム詳細
+    blog/page.tsx               ブログ一覧（自動投稿）
+    blog/[slug]/page.tsx        ブログ詳細
+    blog/category/[category]/page.tsx  ブログのカテゴリー別一覧
+    area/[slug]/page.tsx        地域ページ
+    feed.xml/route.ts           RSS（コラム＋ブログ）
     privacy/page.tsx            プライバシーポリシー
     actions/contact.ts          フォーム送信の Server Action
     sitemap.ts / robots.ts
@@ -568,6 +680,18 @@ src/
     validation.ts               Zod スキーマ
     mail.ts                     Resend 送信
     images.ts                   画像の存在チェック
+    blog.ts                     content/blog の Markdown 読み込み
+
+content/
+  blog/                         自動投稿された記事（Markdown）
+
+scripts/
+  blog-topics.ts                記事テーマ一覧と内部リンク許可リスト
+  generate-daily-post.ts        Claude API による記事生成
+  optimize-images.mjs           画像の WebP 変換
+
+.github/workflows/
+  daily-blog.yml                毎日12:10（JST）の自動投稿
 ```
 
 ---
@@ -582,6 +706,7 @@ src/
 | エアコン工事（一覧・詳細） | `Service`（`hasOfferCatalog` 付き）/ `FAQPage` |
 | 地域ページ | `Service` / `FAQPage` |
 | 専門コラム（詳細） | `Article`（`reviewedBy` に代表者名）/ `FAQPage` |
+| ブログ（詳細） | `Article`（`reviewedBy` に代表者名）/ `FAQPage`（本文に「よくある質問」がある場合） |
 | 施工事例（詳細） | `Article` |
 | お知らせ（詳細） | `Article` |
 | よくある質問 | `FAQPage` |
