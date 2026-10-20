@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { mainNav } from '@/data/nav'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { PhoneIcon } from '@/components/ui/Button'
 
 export function Header() {
@@ -114,26 +114,30 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* 電話：工事の相談窓口であることを明示する */}
-          <a
-            href={`tel:${site.tel.href}`}
-            className="hidden items-center gap-2 border border-navy px-4 py-2.5 text-navy transition-colors hover:bg-navy hover:text-white lg:inline-flex"
-          >
-            <PhoneIcon />
-            <span className="text-left leading-tight">
-              <span className="block text-[0.6rem] tracking-wider">工事のご相談</span>
-              <span className="block text-base font-bold tabular-nums">{site.tel.display}</span>
-            </span>
-          </a>
+          {showTel ? (
+            <>
+              {/* 電話：工事の相談窓口であることを明示する */}
+              <a
+                href={`tel:${site.tel.href}`}
+                className="hidden items-center gap-2 border border-navy px-4 py-2.5 text-navy transition-colors hover:bg-navy hover:text-white lg:inline-flex"
+              >
+                <PhoneIcon />
+                <span className="text-left leading-tight">
+                  <span className="block text-[0.6rem] tracking-wider">工事のご相談</span>
+                  <span className="block text-base font-bold tabular-nums">{site.tel.display}</span>
+                </span>
+              </a>
 
-          {/* スマホ：電話アイコン */}
-          <a
-            href={`tel:${site.tel.href}`}
-            className="inline-flex h-11 w-11 items-center justify-center border border-line text-navy lg:hidden"
-            aria-label={`電話で相談する ${site.tel.display}`}
-          >
-            <PhoneIcon className="h-5 w-5" />
-          </a>
+              {/* スマホ：電話アイコン */}
+              <a
+                href={`tel:${site.tel.href}`}
+                className="inline-flex h-11 w-11 items-center justify-center border border-line text-navy lg:hidden"
+                aria-label={`電話で相談する ${site.tel.display}`}
+              >
+                <PhoneIcon className="h-5 w-5" />
+              </a>
+            </>
+          ) : null}
 
           {/* スマホ：ハンバーガー */}
           <button
@@ -199,19 +203,21 @@ export function Header() {
                 ))}
               </ul>
             </nav>
-            <div className="px-5 pt-6">
-              <a
-                href={`tel:${site.tel.href}`}
-                onClick={() => setOpen(false)}
-                className="flex min-h-14 items-center justify-center gap-2 bg-navy px-4 text-white"
-              >
-                <PhoneIcon className="h-5 w-5" />
-                <span className="text-lg font-bold tabular-nums">{site.tel.display}</span>
-              </a>
-              <p className="mt-2 text-xs text-ink-soft">
-                工事のご相談・採用のご相談どちらも、この番号で受け付けています。お電話の際にご用件をお伝えください。
-              </p>
-            </div>
+            {showTel ? (
+              <div className="px-5 pt-6">
+                <a
+                  href={`tel:${site.tel.href}`}
+                  onClick={() => setOpen(false)}
+                  className="flex min-h-14 items-center justify-center gap-2 bg-navy px-4 text-white"
+                >
+                  <PhoneIcon className="h-5 w-5" />
+                  <span className="text-lg font-bold tabular-nums">{site.tel.display}</span>
+                </a>
+                <p className="mt-2 text-xs text-ink-soft">
+                  工事のご相談・採用のご相談どちらも、この番号で受け付けています。お電話の際にご用件をお伝えください。
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

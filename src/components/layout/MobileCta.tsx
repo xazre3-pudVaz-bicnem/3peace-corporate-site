@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { PhoneIcon } from '@/components/ui/Button'
 
 /**
@@ -17,15 +17,17 @@ export function MobileCta() {
         折り返して高さが増えると、body の padding-bottom を超えてフッターを覆うため。
         用件の区別はラベルと aria-label の両方で示しています。
       */}
-      <nav aria-label="お問い合わせ・応募" className="grid grid-cols-3">
-        <a
-          href={`tel:${site.tel.href}`}
-          aria-label={`電話でエアコン工事について相談する ${site.tel.display}`}
-          className="flex min-h-17 flex-col items-center justify-center gap-1 border-r border-line px-1 py-2 text-navy"
-        >
-          <PhoneIcon className="h-5 w-5" />
-          <span className="text-[0.7rem] font-bold whitespace-nowrap">電話で相談</span>
-        </a>
+      <nav aria-label="お問い合わせ・応募" className={`grid ${showTel ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        {showTel ? (
+          <a
+            href={`tel:${site.tel.href}`}
+            aria-label={`電話でエアコン工事について相談する ${site.tel.display}`}
+            className="flex min-h-17 flex-col items-center justify-center gap-1 border-r border-line px-1 py-2 text-navy"
+          >
+            <PhoneIcon className="h-5 w-5" />
+            <span className="text-[0.7rem] font-bold whitespace-nowrap">電話で相談</span>
+          </a>
+        ) : null}
         <Link
           href="/contact"
           aria-label="エアコン工事についてフォームから問い合わせる"

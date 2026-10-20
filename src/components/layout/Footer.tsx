@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
 import { PhoneIcon } from '@/components/ui/Button'
 import { footerCompanyNav, footerKnowledgeNav, footerServiceNav, type NavItem } from '@/data/nav'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 
 function FooterNav({ title, items }: { title: string; items: NavItem[] }) {
   return (
@@ -38,13 +38,15 @@ export function Footer() {
             <address className="mt-5 space-y-2 text-sm leading-7 text-white/85 not-italic">
               <span className="block">{site.representativeRole} {site.representative}</span>
               <span className="block">{site.address.full}</span>
-              <a
-                href={`tel:${site.tel.href}`}
-                className="inline-flex min-h-11 items-center gap-2 text-lg font-bold tabular-nums text-white hover:text-sky"
-              >
-                <PhoneIcon />
-                {site.tel.display}
-              </a>
+              {showTel ? (
+                <a
+                  href={`tel:${site.tel.href}`}
+                  className="inline-flex min-h-11 items-center gap-2 text-lg font-bold tabular-nums text-white hover:text-sky"
+                >
+                  <PhoneIcon />
+                  {site.tel.display}
+                </a>
+              ) : null}
             </address>
             <a
               href={site.instagram}

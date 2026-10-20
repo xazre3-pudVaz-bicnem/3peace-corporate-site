@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Container } from '@/components/ui/Container'
 import { ArrowRight, ButtonLink, PhoneIcon } from '@/components/ui/Button'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 
 export default function Error({
   error,
@@ -26,7 +26,7 @@ export default function Error({
         </h1>
         <p className="mt-5 text-[0.95rem] leading-8 text-ink-soft">
           お手数ですが、しばらく時間をおいてから再度お試しください。
-          お急ぎの場合は、お電話でもご相談を受け付けています。
+          {showTel ? 'お急ぎの場合は、お電話でもご相談を受け付けています。' : null}
         </p>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -41,10 +41,12 @@ export default function Error({
             トップページへ戻る
             <ArrowRight />
           </ButtonLink>
-          <ButtonLink href={`tel:${site.tel.href}`} variant="ghost">
-            <PhoneIcon />
-            {site.tel.display}
-          </ButtonLink>
+          {showTel ? (
+            <ButtonLink href={`tel:${site.tel.href}`} variant="ghost">
+              <PhoneIcon />
+              {site.tel.display}
+            </ButtonLink>
+          ) : null}
         </div>
       </div>
     </Container>

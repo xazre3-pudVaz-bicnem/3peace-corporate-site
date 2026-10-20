@@ -4,7 +4,7 @@ import { PageHero } from '@/components/layout/PageHero'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { Section } from '@/components/ui/Section'
 import { JsonLd } from '@/components/ui/JsonLd'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
@@ -126,12 +126,14 @@ export default function PrivacyPage() {
               <span className="block">{site.name}</span>
               <span className="block">{site.representativeRole} {site.representative}</span>
               <span className="block">{site.address.full}</span>
-              <a
-                href={`tel:${site.tel.href}`}
-                className="link-underline inline-flex min-h-11 items-center tabular-nums"
-              >
-                {site.tel.display}
-              </a>
+              {showTel ? (
+                <a
+                  href={`tel:${site.tel.href}`}
+                  className="link-underline inline-flex min-h-11 items-center tabular-nums"
+                >
+                  {site.tel.display}
+                </a>
+              ) : null}
             </address>
           </section>
         </div>

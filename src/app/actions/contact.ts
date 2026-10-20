@@ -1,6 +1,6 @@
 'use server'
 
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { buildMailBody, isMailConfigured, sendMail } from '@/lib/mail'
 import { applicationSchema, contactSchema, toFieldErrors, type FormState } from '@/lib/validation'
 
@@ -24,8 +24,9 @@ function isTooFast(formData: FormData): boolean {
 function notConfiguredState(): FormState {
   return {
     status: 'error',
-    message:
-      '現在フォームからの送信を受け付けられません。お手数ですが、お電話または Instagram からご連絡ください。',
+    message: `現在フォームからの送信を受け付けられません。お手数ですが、${
+      showTel ? 'お電話または ' : ''
+    }Instagram からご連絡ください。`,
   }
 }
 
@@ -75,8 +76,9 @@ export async function submitContact(_prev: FormState, formData: FormData): Promi
   if (!result.ok) {
     return {
       status: 'error',
-      message:
-        '送信中にエラーが発生しました。お手数ですが、時間をおいてお試しいただくか、お電話でご連絡ください。',
+      message: `送信中にエラーが発生しました。お手数ですが、時間をおいてお試しいただくか、${
+        showTel ? 'お電話' : 'Instagram'
+      }でご連絡ください。`,
     }
   }
 
@@ -135,8 +137,9 @@ export async function submitApplication(_prev: FormState, formData: FormData): P
   if (!result.ok) {
     return {
       status: 'error',
-      message:
-        '送信中にエラーが発生しました。お手数ですが、時間をおいてお試しいただくか、お電話でご連絡ください。',
+      message: `送信中にエラーが発生しました。お手数ですが、時間をおいてお試しいただくか、${
+        showTel ? 'お電話' : 'Instagram'
+      }でご連絡ください。`,
     }
   }
 

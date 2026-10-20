@@ -26,7 +26,7 @@ import {
   inquiryTypeOptions,
   installLocationOptions,
 } from '@/lib/validation'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 
 type Props = {
   /** メール送信の設定が有効かどうか（サーバー側で判定した値を渡す） */
@@ -40,10 +40,12 @@ export function ContactForm({ mailEnabled }: Props) {
     return (
       <MailNotConfiguredNotice>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <ButtonLink href={`tel:${site.tel.href}`}>
-            <PhoneIcon />
-            {site.tel.display}
-          </ButtonLink>
+          {showTel ? (
+            <ButtonLink href={`tel:${site.tel.href}`}>
+              <PhoneIcon />
+              {site.tel.display}
+            </ButtonLink>
+          ) : null}
           <ButtonLink href={site.instagram} variant="outline" external>
             Instagram で相談する
           </ButtonLink>
@@ -58,15 +60,21 @@ export function ContactForm({ mailEnabled }: Props) {
         <h3 className="text-xl font-bold text-navy">お問い合わせを受け付けました</h3>
         <p className="mt-4 text-[0.95rem] leading-8 text-ink-soft">
           内容を確認のうえ、ご希望の連絡方法でご連絡します。
-          <br />
-          お急ぎの場合は、お電話でもご相談を受け付けています。
+          {showTel ? (
+            <>
+              <br />
+              お急ぎの場合は、お電話でもご相談を受け付けています。
+            </>
+          ) : null}
         </p>
-        <div className="mt-6 flex justify-center">
-          <ButtonLink href={`tel:${site.tel.href}`} variant="outline">
-            <PhoneIcon />
-            {site.tel.display}
-          </ButtonLink>
-        </div>
+        {showTel ? (
+          <div className="mt-6 flex justify-center">
+            <ButtonLink href={`tel:${site.tel.href}`} variant="outline">
+              <PhoneIcon />
+              {site.tel.display}
+            </ButtonLink>
+          </div>
+        ) : null}
       </div>
     )
   }
@@ -179,12 +187,16 @@ export function ContactForm({ mailEnabled }: Props) {
       <div className="pt-2">
         <SubmitButton label="この内容で送信する" />
         <p className="mt-4 text-xs leading-6 text-ink-soft">
-          送信後、内容を確認してご連絡します。数日たっても連絡がない場合は、
-          お手数ですがお電話（
-          <a href={`tel:${site.tel.href}`} className="link-underline tabular-nums">
-            {site.tel.display}
-          </a>
-          ）でご確認ください。
+          送信後、内容を確認してご連絡します。
+          {showTel ? (
+            <>
+              数日たっても連絡がない場合は、お手数ですがお電話（
+              <a href={`tel:${site.tel.href}`} className="link-underline tabular-nums">
+                {site.tel.display}
+              </a>
+              ）でご確認ください。
+            </>
+          ) : null}
         </p>
       </div>
     </form>

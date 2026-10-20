@@ -12,7 +12,7 @@ import { ApplicationForm } from '@/components/forms/ApplicationForm'
 
 import { getJob, publishedJobs } from '@/data/jobs'
 import { recruitmentSettings } from '@/data/recruit'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { isMailConfigured } from '@/lib/mail'
 import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
@@ -217,16 +217,18 @@ export default async function JobDetailPage({ params }: Params) {
                 採用について問い合わせる
                 <ArrowRight />
               </ButtonLink>
-              <a
-                href={`tel:${site.tel.href}`}
-                className="flex min-h-13 flex-col items-center justify-center border border-navy px-6 py-3 text-navy transition-colors hover:bg-navy hover:text-white sm:flex-1"
-              >
-                <span className="flex items-center gap-2 text-xl font-bold tabular-nums">
-                  <PhoneIcon className="h-5 w-5" />
-                  {site.tel.display}
-                </span>
-                <span className="mt-0.5 text-xs">採用のお電話はその旨をお伝えください</span>
-              </a>
+              {showTel ? (
+                <a
+                  href={`tel:${site.tel.href}`}
+                  className="flex min-h-13 flex-col items-center justify-center border border-navy px-6 py-3 text-navy transition-colors hover:bg-navy hover:text-white sm:flex-1"
+                >
+                  <span className="flex items-center gap-2 text-xl font-bold tabular-nums">
+                    <PhoneIcon className="h-5 w-5" />
+                    {site.tel.display}
+                  </span>
+                  <span className="mt-0.5 text-xs">採用のお電話はその旨をお伝えください</span>
+                </a>
+              ) : null}
             </div>
           )}
         </Reveal>

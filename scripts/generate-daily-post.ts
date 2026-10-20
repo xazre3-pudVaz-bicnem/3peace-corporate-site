@@ -19,6 +19,7 @@ import path from 'node:path'
 import Anthropic from '@anthropic-ai/sdk'
 import matter from 'gray-matter'
 import { allowedInternalLinks, blogTopics, type BlogTopic } from './blog-topics'
+import { showTel } from '../src/data/site'
 
 // ── 設定 ──────────────────────────────────────────────────────────
 /** コスト重視。通常の毎日投稿では Sonnet / Opus を使いません */
@@ -185,7 +186,8 @@ function buildSystemPrompt(): string {
     '',
     '## 事実として書いてよいこと',
     `- 会社名は ${SITE.name}、代表者は ${SITE.representative}`,
-    `- 所在地は ${SITE.address}、電話番号は ${SITE.telDisplay}`,
+    // 臨時休業中は電話番号を本文に書かせない（記事末尾の電話の行はサイト側で非表示にしている）
+    showTel ? `- 所在地は ${SITE.address}、電話番号は ${SITE.telDisplay}` : `- 所在地は ${SITE.address}`,
     '- エアコンの新設・交換・移設・取り外しに対応している',
     '- 設置場所と配管経路を確認し、真空引きと試運転、動作確認まで行って引き渡している',
     '',

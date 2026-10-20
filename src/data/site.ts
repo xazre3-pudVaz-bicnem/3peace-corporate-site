@@ -92,10 +92,26 @@ export const site = {
   /** 問い合わせ受付状態（false にすると問い合わせフォームを閉じる） */
   acceptingInquiries: true,
 
+  /**
+   * 臨時休業。
+   * active が true のあいだは、トップページ最上部に臨時休業のお知らせを大きく表示し、
+   * 電話番号をサイト全体（画面・構造化データ・ブログ記事）から外します（`showTel`）。
+   * 営業を再開したら active を false に戻すだけで、元の表示に戻ります。
+   */
+  temporaryClosure: {
+    active: true as boolean,
+    title: '現在、臨時休業中です',
+    message:
+      '誠に勝手ながら、現在臨時休業をいただいております。ご不便をおかけしますが、何卒ご理解くださいますようお願い申し上げます。営業再開の際は、あらためてお知らせいたします。',
+  },
+
   /** ロゴ・OG画像（public 配下に実ファイルがある場合のみ構造化データへ出力される） */
   logoPath: '/logo/3peace-logo.png',
   ogImagePath: '/images/og/3peace-og.jpg',
 } as const
+
+/** 電話番号を表示するか（臨時休業中は画面・構造化データの両方から外す） */
+export const showTel = !site.temporaryClosure.active
 
 /** 空文字・空白のみ・undefined を除外するユーティリティ */
 export function hasValue(v: unknown): v is string {
@@ -114,7 +130,7 @@ export const companyRows: CompanyRow[] = [
   { label: '会社名', value: site.name },
   { label: '代表者', value: site.representative },
   { label: '所在地', value: site.address.full },
-  { label: '電話番号', value: site.tel.display, href: `tel:${site.tel.href}` },
+  { label: '電話番号', value: showTel ? site.tel.display : undefined, href: `tel:${site.tel.href}` },
   { label: '事業内容', value: site.businessSummary },
   { label: '営業時間', value: site.businessHours.weekday },
   { label: '定休日', value: site.closedDays },

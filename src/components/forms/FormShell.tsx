@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
 import type { FormState } from '@/lib/validation'
+import { showTel } from '@/data/site'
 
 /** 送信ボタン。送信中は無効化して二重送信を防ぎます。 */
 export function SubmitButton({ label }: { label: string }) {
@@ -81,7 +82,7 @@ export function MailNotConfiguredNotice({ children }: { children?: ReactNode }) 
         現在、フォームからの送信を停止しています
       </h3>
       <p className="mt-3 text-[0.925rem] leading-8 text-ink-soft">
-        お手数ですが、お電話または Instagram のメッセージからご連絡ください。
+        お手数ですが、{showTel ? 'お電話または ' : ''}Instagram のメッセージからご連絡ください。
         いただいたご連絡には順次お返事します。
       </p>
       {children}

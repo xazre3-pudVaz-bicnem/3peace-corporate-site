@@ -1,4 +1,4 @@
-import { site, hasValue } from '@/data/site'
+import { site, hasValue, showTel } from '@/data/site'
 import { indexableAreas } from '@/data/areas'
 import { publicFileExists } from '@/lib/images'
 import { absoluteUrl } from '@/lib/seo'
@@ -23,6 +23,9 @@ const address = {
   streetAddress: site.address.streetAddress,
   ...(hasValue(site.address.postalCode) ? { postalCode: site.address.postalCode } : {}),
 }
+
+/** 臨時休業中は電話番号を出力しない（画面から外しているため） */
+const telephone = showTel ? { telephone: site.tel.href } : {}
 
 function logo() {
   const url = absoluteUrl(site.logoPath)
@@ -51,16 +54,20 @@ export function organizationSchema() {
     alternateName: '3Peace エアコン工事',
     ...(url ? { url } : {}),
     ...(logoUrl ? { logo: logoUrl, image: logoUrl } : {}),
-    telephone: site.tel.href,
+    ...telephone,
     address,
     sameAs: [site.instagram],
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer service',
-      telephone: site.tel.href,
-      areaServed: 'JP',
-      availableLanguage: ['Japanese'],
-    },
+    ...(showTel
+      ? {
+          contactPoint: {
+            '@type': 'ContactPoint',
+            contactType: 'customer service',
+            telephone: site.tel.href,
+            areaServed: 'JP',
+            availableLanguage: ['Japanese'],
+          },
+        }
+      : {}),
   }
 }
 
@@ -92,7 +99,7 @@ export function hvacBusinessSchema() {
     alternateName: '3Peace エアコン工事',
     description: site.description,
     ...(url ? { url } : {}),
-    telephone: site.tel.href,
+    ...telephone,
     address,
     ...(logoUrl ? { image: logoUrl, logo: logoUrl } : {}),
     sameAs: [site.instagram],
@@ -157,7 +164,7 @@ export function serviceSchema(input: {
       : {
           '@type': 'HVACBusiness',
           name: site.name,
-          telephone: site.tel.href,
+          ...telephone,
           address,
         },
     ...areaServed(),

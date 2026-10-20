@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import Markdown from 'react-markdown'
+import Markdown, { defaultUrlTransform } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 import { Reveal } from '@/components/ui/Reveal'
+import { showTel } from '@/data/site'
 
 /**
  * Markdown 記事（content/blog）の本文描画。
@@ -56,6 +57,25 @@ function toText(children: ReactNode): string {
   return ''
 }
 
+type HastNode = {
+  type: string
+  tagName?: string
+  properties?: Record<string, unknown>
+  children?: HastNode[]
+}
+
+/** 既定の変換は tel: を空文字にしてしまうため、tel: だけはそのまま通す */
+function urlTransform(url: string) {
+  return url.startsWith('tel:') ? url : defaultUrlTransform(url)
+}
+
+/** 要素の中に電話リンク（tel:）が含まれるか */
+function containsTelLink(node: HastNode | undefined): boolean {
+  if (!node) return false
+  if (node.tagName === 'a' && String(node.properties?.href ?? '').startsWith('tel:')) return true
+  return node.children?.some(containsTelLink) ?? false
+}
+
 /** 記事の目次 */
 export function MarkdownToc({ headings }: { headings: { text: string; id: string }[] }) {
   if (headings.length < 2) return null
@@ -97,6 +117,7 @@ export function MarkdownBody({ content }: { content: string }) {
     <div className="markdown-body">
       <Markdown
         remarkPlugins={[remarkGfm]}
+        urlTransform={urlTransform}
         components={{
           h1: ({ children }) => (
             <h2 className="mt-14 border-l-4 border-blue pl-4 text-xl leading-snug font-bold text-ink sm:text-2xl">
@@ -131,9 +152,11 @@ export function MarkdownBody({ content }: { content: string }) {
           ol: ({ children }) => (
             <ol className="mt-5 list-decimal space-y-2 pl-6 marker:text-blue">{children}</ol>
           ),
-          li: ({ children }) => (
-            <li className="text-[0.95rem] leading-8 text-ink-soft">{children}</li>
-          ),
+          li: ({ node, children }) => {
+            // 臨時休業中は記事末尾の「お電話：…」の行ごと出さない
+            if (!showTel && containsTelLink(node)) return null
+            return <li className="text-[0.95rem] leading-8 text-ink-soft">{children}</li>
+          },
           strong: ({ children }) => <strong className="font-bold text-ink">{children}</strong>,
           blockquote: ({ children }) => (
             <blockquote className="mt-6 border-l-4 border-line-strong bg-mist px-5 py-4 text-[0.925rem] leading-8 text-ink-soft">
@@ -161,6 +184,7 @@ export function MarkdownBody({ content }: { content: string }) {
                 </Link>
               )
             }
+            if (url.startsWith('tel:') && !showTel) return null
             if (url.startsWith('tel:') || url.startsWith('mailto:') || url.startsWith('#')) {
               return (
                 <a href={url} className="link-underline font-bold text-blue">

@@ -26,7 +26,7 @@ import {
   experienceOptions,
   initialFormState,
 } from '@/lib/validation'
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 
 type Props = {
   mailEnabled: boolean
@@ -41,17 +41,21 @@ export function ApplicationForm({ mailEnabled, jobOptions }: Props) {
     return (
       <MailNotConfiguredNotice>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <ButtonLink href={`tel:${site.tel.href}`}>
-            <PhoneIcon />
-            {site.tel.display}
-          </ButtonLink>
+          {showTel ? (
+            <ButtonLink href={`tel:${site.tel.href}`}>
+              <PhoneIcon />
+              {site.tel.display}
+            </ButtonLink>
+          ) : null}
           <ButtonLink href={site.instagram} variant="outline" external>
             Instagram から連絡する
           </ButtonLink>
         </div>
-        <p className="mt-4 text-xs leading-6 text-ink-soft">
-          お電話の際は「採用について」とお伝えください。
-        </p>
+        {showTel ? (
+          <p className="mt-4 text-xs leading-6 text-ink-soft">
+            お電話の際は「採用について」とお伝えください。
+          </p>
+        ) : null}
       </MailNotConfiguredNotice>
     )
   }

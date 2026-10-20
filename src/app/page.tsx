@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { HomeHero } from '@/components/sections/HomeHero'
+import { ClosureNotice } from '@/components/sections/ClosureNotice'
 import { ContactCta } from '@/components/sections/ContactCta'
 import { InstagramSection } from '@/components/sections/InstagramSection'
 import { CompanyTable } from '@/components/sections/CompanyTable'
@@ -72,6 +73,9 @@ export default function HomePage() {
 
   return (
     <>
+      {/* 臨時休業中のみ表示（src/data/site.ts の temporaryClosure） */}
+      {site.temporaryClosure.active ? <ClosureNotice /> : null}
+
       <HomeHero />
 
       {/* 広島でエアコン工事を依頼するなら */}

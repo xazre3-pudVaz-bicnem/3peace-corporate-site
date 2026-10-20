@@ -40,7 +40,7 @@ const telSchema = z
   .trim()
   .min(1, '電話番号を入力してください。')
   .refine((v) => TEL_RE.test(v.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))), {
-    message: '電話番号の形式が正しくありません。（例：080-3880-4024）',
+    message: '電話番号の形式が正しくありません。（例：080-1234-5678）',
   })
 
 const optionalEmailSchema = z

@@ -8,15 +8,16 @@ import { Reveal } from '@/components/ui/Reveal'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { ContactForm } from '@/components/forms/ContactForm'
 
-import { site } from '@/data/site'
+import { site, showTel } from '@/data/site'
 import { isMailConfigured } from '@/lib/mail'
 import { buildMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
 export const metadata: Metadata = buildMetadata({
   title: 'エアコン工事のご相談・お問い合わせ',
-  description:
-    'エアコンの新設・交換・移設・取り外しに関するご相談はこちらから。広島市西区己斐上を拠点にエアコン工事を行う3Peaceが、設置場所の状況を確認したうえでご案内します。お電話（080-3880-4024）・フォーム・Instagram で受け付けています。',
+  description: `エアコンの新設・交換・移設・取り外しに関するご相談はこちらから。広島市西区己斐上を拠点にエアコン工事を行う3Peaceが、設置場所の状況を確認したうえでご案内します。${
+    showTel ? `お電話（${site.tel.display}）・フォーム・Instagram` : 'フォーム・Instagram'
+  } で受け付けています。`,
   path: '/contact',
 })
 
@@ -37,20 +38,22 @@ export default function ContactPage() {
         <h2 id="contact-methods-heading" className="sr-only">
           お問い合わせ方法
         </h2>
-        <div className="grid gap-px bg-line sm:grid-cols-3">
-          <div className="bg-white p-6">
-            <p className="text-xs font-bold tracking-wider text-blue">お電話</p>
-            <a
-              href={`tel:${site.tel.href}`}
-              className="mt-3 inline-flex min-h-11 items-center gap-2 text-xl font-bold tabular-nums text-navy hover:text-blue"
-            >
-              <PhoneIcon className="h-5 w-5" />
-              {site.tel.display}
-            </a>
-            <p className="mt-2 text-xs leading-6 text-ink-soft">
-              工事・採用どちらのご相談も受け付けています。ご用件をお伝えください。
-            </p>
-          </div>
+        <div className={`grid gap-px bg-line ${showTel ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+          {showTel ? (
+            <div className="bg-white p-6">
+              <p className="text-xs font-bold tracking-wider text-blue">お電話</p>
+              <a
+                href={`tel:${site.tel.href}`}
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-xl font-bold tabular-nums text-navy hover:text-blue"
+              >
+                <PhoneIcon className="h-5 w-5" />
+                {site.tel.display}
+              </a>
+              <p className="mt-2 text-xs leading-6 text-ink-soft">
+                工事・採用どちらのご相談も受け付けています。ご用件をお伝えください。
+              </p>
+            </div>
+          ) : null}
           <div className="bg-white p-6">
             <p className="text-xs font-bold tracking-wider text-blue">フォーム</p>
             <p className="mt-3 text-[0.95rem] font-bold text-navy">下記のフォームから</p>
