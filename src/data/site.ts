@@ -99,7 +99,7 @@ export const site = {
    * 営業を再開したら active を false に戻すだけで、元の表示に戻ります。
    */
   temporaryClosure: {
-    active: true as boolean,
+    active: false as boolean,
     title: '現在、臨時休業中です',
     message:
       '誠に勝手ながら、現在臨時休業をいただいております。ご不便をおかけしますが、何卒ご理解くださいますようお願い申し上げます。営業再開の際は、あらためてお知らせいたします。',
